@@ -1,6 +1,6 @@
 {
   "manifest_schema_version": 3,
-  "sdk_version": "5.9.9",
+  "sdk_version": "5.9.11",
   "app_id": "mailerlite-connector",
   "version": "0.1.0",
   "name": "MailerLite",
@@ -3847,6 +3847,18 @@
       "write_mode": "extension",
       "max_bytes": 8192,
       "scope": "user"
+    }
+  ],
+  "file_sinks": [
+    {
+      "tool": "create_campaign",
+      "accepts": [
+        "text/html",
+        "text/*"
+      ],
+      "arg": "content_html",
+      "arg_kind": "text",
+      "description": "Turn an uploaded HTML email template into a new draft campaign"
     }
   ],
   "panels": [

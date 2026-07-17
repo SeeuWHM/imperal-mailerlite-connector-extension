@@ -76,6 +76,22 @@ chat = ChatExtension(
 )
 
 
+# File Mage L3 — declares this app as a valid destination when the user has
+# an uploaded file (via the file-reader system ext) and wants it turned into
+# a MailerLite campaign. `arg="content_html"` maps the file's EXTRACTED TEXT
+# straight into the existing content_html field (arg_kind="text") — e.g. a
+# ready-made HTML email template dropped in and turned into a draft campaign.
+# Text-only source formats since content_html expects markup/text, not a
+# structured document.
+ext.file_sink(
+    "create_campaign",
+    accepts=["text/html", "text/*"],
+    arg="content_html",
+    arg_kind="text",
+    description="Turn an uploaded HTML email template into a new draft campaign",
+)
+
+
 @ext.health_check
 async def health(ctx) -> dict:
     """Report whether the user has at least one MailerLite account connected."""

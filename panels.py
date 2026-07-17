@@ -85,12 +85,23 @@ async def sidebar_panel(ctx, show_add: bool = False):
     active_label = (active or {}).get("label", "")
     active_key = (active or {}).get("api_key", "")
 
-    subscriber_total = None
+    subscriber_total = "0"
     group_total = None
     campaigns_section: list[ui.UINode] = []
     try:
-        subs = await ml_get(ctx, active_key, "subscribers", params={"limit": 1})
-        subscriber_total = (subs.get("meta") or {}).get("total")
+        # GET /subscribers uses CURSOR pagination — confirmed live: its `meta`
+        # never carries a `total` field (only next_cursor/prev_cursor), unlike
+        # page-based endpoints like /groups. The documented `GET
+        # /subscribers/count` also 404s live despite being in MailerLite's
+        # docs outline. So `meta.total` was always None here -> always showed
+        # "0" regardless of real subscriber count. Fix: pull one page at the
+        # max page size (1000, confirmed live) and show the exact count when
+        # it all fit on this page, or "N+" when a next_cursor says there's
+        # more — honest either way, and still just one API call.
+        subs = await ml_get(ctx, active_key, "subscribers", params={"limit": 1000})
+        sub_rows = subs.get("data") or []
+        has_more = bool((subs.get("meta") or {}).get("next_cursor"))
+        subscriber_total = f"{len(sub_rows):,}" + ("+" if has_more else "")
         groups = await ml_get(ctx, active_key, "groups", params={"limit": 1})
         group_total = (groups.get("meta") or {}).get("total")
         campaigns = await ml_get(ctx, active_key, "campaigns", params={
@@ -146,7 +157,7 @@ async def sidebar_panel(ctx, show_add: bool = False):
                   on_click=ui.Call("__panel__mailerlite_sidebar", show_add=True)),
         ui.Divider(),
         ui.Stats(children=[
-            ui.Stat(label="Subscribers", value=str(subscriber_total or 0), icon="Users"),
+            ui.Stat(label="Subscribers", value=subscriber_total, icon="Users"),
             ui.Stat(label="Groups", value=str(group_total or 0), icon="Folder"),
         ]),
         *campaigns_section,

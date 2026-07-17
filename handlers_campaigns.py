@@ -37,10 +37,10 @@ async def _require_key(ctx) -> str:
 def _to_campaign(row: dict) -> CampaignRecord:
     email0 = (row.get("emails") or [{}])[0] if row.get("emails") else {}
     return CampaignRecord(
-        id=str(row.get("id", "")), name=row.get("name", ""), type=row.get("type", ""),
-        status=row.get("status", ""), subject=email0.get("subject", ""),
+        id=str(row.get("id", "")), name=row.get("name", "") or "", type=row.get("type", "") or "",
+        status=row.get("status", "") or "", subject=email0.get("subject") or "",
         missing_data=row.get("missing_data") or [],
-        created_at=row.get("created_at", ""), scheduled_for=row.get("scheduled_for"),
+        created_at=row.get("created_at", "") or "", scheduled_for=row.get("scheduled_for"),
     )
 
 

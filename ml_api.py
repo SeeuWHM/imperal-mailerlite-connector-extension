@@ -136,3 +136,16 @@ def validate_campaigns_limit(limit: int) -> int:
     if limit in CAMPAIGNS_LIST_VALID_LIMITS:
         return limit
     return min(CAMPAIGNS_LIST_VALID_LIMITS, key=lambda v: abs(v - limit))
+
+
+def ml_str(row: dict, key: str, default: str = "") -> str:
+    """Safe string extraction from a MailerLite API row. `dict.get(key,
+    default)` only falls back when the KEY IS ABSENT — but MailerLite
+    genuinely returns JSON `null` for present-but-empty fields (confirmed
+    live: a draft campaign's `emails[0].subject` is `null`, not an empty
+    string, until the user fills it in — this crashed list_campaigns() on
+    real draft campaigns before this helper existed). Treats null-or-missing
+    the same way, which `dict.get` alone does not.
+    """
+    value = row.get(key)
+    return value if isinstance(value, str) else default

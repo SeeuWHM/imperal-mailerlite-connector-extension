@@ -7,7 +7,7 @@ from imperal_sdk.types import ActionResult
 
 from app import chat
 from accounts import _active_api_key
-from ml_api import ml_get, ml_post, ml_put, ml_delete, MailerLiteError
+from ml_api import ml_get, ml_post, ml_put, ml_delete, ml_str, MailerLiteError
 from params import (
     ListFormsParams, FormIdParams, RenameFormParams, FormSubscribersParams,
     ListFieldsParams, CreateFieldParams, FieldIdParams, RenameFieldParams,
@@ -25,14 +25,14 @@ async def _require_key(ctx) -> str:
 
 def _to_form(row: dict) -> FormRecord:
     return FormRecord(
-        id=str(row.get("id", "")), name=row.get("name", ""),
+        id=str(row.get("id", "")), name=ml_str(row, "name"),
         conversions_count=row.get("conversions_count", 0), visitors=row.get("visitors", 0),
-        created_at=row.get("created_at", ""),
+        created_at=ml_str(row, "created_at"),
     )
 
 
 def _to_field(row: dict) -> FieldRecord:
-    return FieldRecord(id=str(row.get("id", "")), name=row.get("name", ""), type=row.get("type", ""))
+    return FieldRecord(id=str(row.get("id", "")), name=ml_str(row, "name"), type=ml_str(row, "type"))
 
 
 @chat.function(

@@ -9,7 +9,7 @@ from imperal_sdk.types import ActionResult
 
 from app import chat
 from accounts import _active_api_key
-from ml_api import ml_get, ml_post, ml_put, ml_delete, MailerLiteError
+from ml_api import ml_get, ml_post, ml_put, ml_delete, ml_str, MailerLiteError
 from params import (
     ListSubscribersParams, SubscriberIdParams, UpsertSubscriberParams, GroupSubscriberParams,
 )
@@ -27,8 +27,8 @@ async def _require_key(ctx) -> str:
 
 def _to_subscriber(row: dict) -> SubscriberRecord:
     return SubscriberRecord(
-        id=str(row.get("id", "")), email=row.get("email", ""), status=row.get("status", ""),
-        source=row.get("source", ""), sent=row.get("sent", 0),
+        id=str(row.get("id", "")), email=ml_str(row, "email"), status=ml_str(row, "status"),
+        source=ml_str(row, "source"), sent=row.get("sent", 0),
         opens_count=row.get("opens_count", 0), clicks_count=row.get("clicks_count", 0),
         open_rate=row.get("open_rate", 0.0), click_rate=row.get("click_rate", 0.0),
         subscribed_at=row.get("subscribed_at"), unsubscribed_at=row.get("unsubscribed_at"),

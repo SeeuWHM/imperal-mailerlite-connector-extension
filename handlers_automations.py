@@ -10,7 +10,7 @@ from imperal_sdk.types import ActionResult
 
 from app import chat
 from accounts import _active_api_key
-from ml_api import ml_get, ml_post, ml_delete, MailerLiteError
+from ml_api import ml_get, ml_post, ml_delete, ml_str, MailerLiteError
 from params import ListAutomationsParams, AutomationIdParams, AutomationActivityParams, CreateAutomationDraftParams
 from response_models import AutomationRecord, AutomationList, AutomationActivityRow, AutomationActivityList, DeletedResponse
 
@@ -24,8 +24,8 @@ async def _require_key(ctx) -> str:
 
 def _to_automation(row: dict) -> AutomationRecord:
     return AutomationRecord(
-        id=str(row.get("id", "")), name=row.get("name", ""), enabled=bool(row.get("enabled", False)),
-        created_at=row.get("created_at", ""),
+        id=str(row.get("id", "")), name=ml_str(row, "name"), enabled=bool(row.get("enabled", False)),
+        created_at=ml_str(row, "created_at"),
     )
 
 

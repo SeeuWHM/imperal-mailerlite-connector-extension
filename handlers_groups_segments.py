@@ -7,7 +7,7 @@ from imperal_sdk.types import ActionResult
 
 from app import chat
 from accounts import _active_api_key
-from ml_api import ml_get, ml_post, ml_put, ml_delete, MailerLiteError
+from ml_api import ml_get, ml_post, ml_put, ml_delete, ml_str, MailerLiteError
 from params import (
     ListGroupsParams, CreateGroupParams, GroupIdParams, RenameGroupParams, GroupSubscribersParams,
     ListSegmentsParams, SegmentIdParams, RenameSegmentParams, SegmentSubscribersParams,
@@ -27,20 +27,20 @@ async def _require_key(ctx) -> str:
 
 def _to_group(row: dict) -> GroupRecord:
     return GroupRecord(
-        id=str(row.get("id", "")), name=row.get("name", ""),
+        id=str(row.get("id", "")), name=ml_str(row, "name"),
         active_count=row.get("active_count", 0), sent_count=row.get("sent_count", 0),
         open_rate=(row.get("open_rate") or {}).get("float", 0.0) if isinstance(row.get("open_rate"), dict) else row.get("open_rate", 0.0),
         click_rate=(row.get("click_rate") or {}).get("float", 0.0) if isinstance(row.get("click_rate"), dict) else row.get("click_rate", 0.0),
-        unsubscribed_count=row.get("unsubscribed_count", 0), created_at=row.get("created_at", ""),
+        unsubscribed_count=row.get("unsubscribed_count", 0), created_at=ml_str(row, "created_at"),
     )
 
 
 def _to_segment(row: dict) -> SegmentRecord:
     return SegmentRecord(
-        id=str(row.get("id", "")), name=row.get("name", ""), total=row.get("total", 0),
+        id=str(row.get("id", "")), name=ml_str(row, "name"), total=row.get("total", 0),
         open_rate=(row.get("open_rate") or {}).get("float", 0.0) if isinstance(row.get("open_rate"), dict) else 0.0,
         click_rate=(row.get("click_rate") or {}).get("float", 0.0) if isinstance(row.get("click_rate"), dict) else 0.0,
-        created_at=row.get("created_at", ""),
+        created_at=ml_str(row, "created_at"),
         automations_using_segment_count=row.get("automations_using_segment_count", 0),
     )
 

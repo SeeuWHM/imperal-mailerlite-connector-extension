@@ -6,7 +6,7 @@ from imperal_sdk.types import ActionResult
 
 from app import chat
 from accounts import _active_api_key
-from ml_api import ml_get, ml_post, ml_put, ml_delete, MailerLiteError
+from ml_api import ml_get, ml_post, ml_put, ml_delete, ml_str, MailerLiteError
 from params import ListWebhooksParams, CreateWebhookParams, WebhookIdParams, EmptyParams
 from response_models import WebhookRecord, WebhookList, DeletedResponse, LanguageRecord, LanguageList, TimezoneRecord, TimezoneList
 
@@ -25,8 +25,8 @@ def _to_webhook(row: dict) -> WebhookRecord:
     # field; nothing downstream needs the raw list.
     events = row.get("events") or []
     return WebhookRecord(
-        id=str(row.get("id", "")), name=row.get("name", ""), event=", ".join(events),
-        url=row.get("url", ""), enabled=bool(row.get("enabled", True)),
+        id=str(row.get("id", "")), name=ml_str(row, "name"), event=", ".join(events),
+        url=ml_str(row, "url"), enabled=bool(row.get("enabled", True)),
     )
 
 

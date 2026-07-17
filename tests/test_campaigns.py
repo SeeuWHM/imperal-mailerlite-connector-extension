@@ -47,6 +47,29 @@ async def test_list_campaigns_success(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_list_campaigns_survives_null_subject_on_draft(monkeypatch):
+    """Regression: confirmed live against a real account with real draft
+    campaigns — MailerLite returns `emails[0].subject: null` (not an empty
+    string) for a draft whose subject line hasn't been filled in yet, which
+    crashed pydantic validation before ml_str() was introduced."""
+    ctx = _ctx()
+    draft_row = {
+        "id": "c2", "name": "Untitled draft", "type": "regular", "status": "draft",
+        "emails": [{"subject": None, "from_name": None, "from": None}],
+        "missing_data": ["subject"], "created_at": "2026-01-01", "scheduled_for": None,
+    }
+
+    async def fake_get(ctx, key, path, params=None):
+        return {"data": [draft_row]}
+
+    monkeypatch.setattr(hc, "ml_get", fake_get)
+    result = await hc.fn_list_campaigns(ctx, ListCampaignsParams(status="draft"))
+    assert result.status == "success"
+    assert result.data.campaigns[0].subject == ""
+    assert result.data.campaigns[0].name == "Untitled draft"
+
+
+@pytest.mark.asyncio
 async def test_list_campaigns_snaps_invalid_limit(monkeypatch):
     ctx = _ctx()
     seen = {}

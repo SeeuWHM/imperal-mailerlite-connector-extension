@@ -1,8 +1,30 @@
 # MailerLite Connector
 
-Imperal extension for [MailerLite](https://www.mailerlite.com/) — subscribers,
-groups, segments, campaigns, automations, forms, custom fields, and webhooks,
-via the user's own MailerLite API key (no OAuth, no shared backend proxy).
+[![Imperal SDK](https://img.shields.io/badge/imperal--sdk-5.9.6-blue)](https://pypi.org/project/imperal-sdk/)
+[![Version](https://img.shields.io/badge/version-0.1.0-green)](https://github.com/SeeuWHM/imperal-mailerlite-connector-extension/releases)
+[![License](https://img.shields.io/badge/license-LGPL--2.1-orange)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Imperal%20Cloud-purple)](https://panel.imperal.io)
+
+**[MailerLite](https://www.mailerlite.com/) email marketing extension for [Imperal Cloud](https://panel.imperal.io).**
+
+Subscribers, groups, segments, campaigns, automations, forms, custom fields, and webhooks — via the user's own MailerLite API key, no OAuth, no shared backend proxy.
+
+---
+
+## What It Does
+
+Talk to it naturally:
+
+```
+"add this subscriber to my newsletter group"
+"create a campaign for the summer sale"
+"how many subscribers do I have in the VIP segment"
+"delete the old promotion form"
+"what's my automation activity look like this month"
+"am I on a plan that supports multivariate campaigns?"
+```
+
+---
 
 ## Architecture
 
@@ -33,9 +55,10 @@ model is inherently per-user.
 | Reference | campaign languages, timezones |
 | Capability | plan-limit status (never a guess — either a live-observed fact or a direct MailerLite doc quote) |
 
-See `docs/research.md` for the full research trail (every endpoint verified
-against live account calls, not just prose docs) and `docs/capability-matrix.md`
-for the plan-awareness design rationale.
+See [`docs/research.md`](docs/research.md) for the full research trail (every
+endpoint verified against live account calls, not just prose docs) and
+[`docs/capability-matrix.md`](docs/capability-matrix.md) for the
+plan-awareness design rationale.
 
 ## Plan-awareness
 
@@ -55,4 +78,11 @@ python3 -m venv .venv
 ./.venv/bin/imperal validate .
 ```
 
-63 pytest cases, 0 errors / 0 warnings on `imperal validate`.
+64 pytest cases, 0 errors / 0 warnings on `imperal validate`.
+
+---
+
+## Built with
+
+- [imperal-sdk](https://github.com/imperalcloud/imperal-sdk) 5.9
+- [Imperal Cloud](https://panel.imperal.io)

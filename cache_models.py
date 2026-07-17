@@ -35,6 +35,10 @@ class SidebarStats(BaseModel):
     sent_campaigns: int = 0            # EXACT — from /campaigns meta.total
                                         # with filter[status]=sent
     total_campaigns: int = 0           # EXACT — meta.aggregations.all
+    last_campaign_name: str = ""       # name/subject of the most recently
+                                        # sent campaign (empty if none sent)
+    last_campaign_opens: int = 0       # EXACT — that campaign's stats.opens_count
+    last_campaign_clicks: int = 0      # EXACT — that campaign's stats.clicks_count
     fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

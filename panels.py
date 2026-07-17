@@ -58,11 +58,28 @@ async def _fetch_sidebar_stats(ctx, active_key: str, active_label: str) -> Sideb
     sent_campaigns = camp_meta.get("total", 0)
     total_campaigns = (camp_meta.get("aggregations") or {}).get("all", sent_campaigns)
 
+    # MailerLite returns sent campaigns newest-first with no sort param
+    # needed (confirmed live) — row 0 is the most recently sent campaign.
+    camp_rows = campaigns.get("data") or []
+    last_name = ""
+    last_opens = 0
+    last_clicks = 0
+    if camp_rows:
+        last = camp_rows[0]
+        email0 = (last.get("emails") or [{}])[0] if last.get("emails") else {}
+        last_name = email0.get("subject") or last.get("name") or "(no subject)"
+        last_stats = last.get("stats") or {}
+        last_opens = last_stats.get("opens_count", 0) or 0
+        last_clicks = last_stats.get("clicks_count", 0) or 0
+
     return SidebarStats(
         account_label=active_label,
         subscriber_display=subscriber_display,
         sent_campaigns=sent_campaigns,
         total_campaigns=total_campaigns,
+        last_campaign_name=last_name,
+        last_campaign_opens=last_opens,
+        last_campaign_clicks=last_clicks,
     )
 
 
@@ -150,6 +167,9 @@ async def sidebar_panel(ctx, show_add: bool = False):
         subscriber_total = stats.subscriber_display
         sent_campaigns = stats.sent_campaigns
         total_campaigns = stats.total_campaigns
+        last_campaign_name = stats.last_campaign_name
+        last_campaign_opens = stats.last_campaign_opens
+        last_campaign_clicks = stats.last_campaign_clicks
 
         campaigns = await ml_get(ctx, active_key, "campaigns", params={
             "limit": validate_campaigns_limit(_SIDEBAR_CAMPAIGNS_LIMIT),
@@ -207,6 +227,14 @@ async def sidebar_panel(ctx, show_add: bool = False):
             ui.Stat(label="Subscribers", value=subscriber_total, icon="Users"),
             ui.Stat(label="Campaigns sent", value=f"{sent_campaigns}/{total_campaigns}", icon="Send"),
         ]),
+        *([
+            ui.Divider(),
+            ui.Text(content=f"Last Campaign: {last_campaign_name}", variant="caption"),
+            ui.Stats(children=[
+                ui.Stat(label="Total Opens", value=f"{last_campaign_opens:,}", icon="MailOpen"),
+                ui.Stat(label="Total Clicks", value=f"{last_campaign_clicks:,}", icon="MousePointerClick"),
+            ]),
+        ] if last_campaign_name else []),
         *campaigns_section,
         ui.Text(content=f"{active_label} — connected", variant="caption"),
     ])

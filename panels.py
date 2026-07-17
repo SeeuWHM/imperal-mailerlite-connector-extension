@@ -31,35 +31,21 @@ def _stats_cache_key(label: str) -> str:
 
 
 async def _fetch_sidebar_stats(ctx, active_key: str, active_label: str) -> SidebarStats:
-    """The actual MailerLite calls — only runs on a cache miss (once per
+    """The actual MailerLite call — only runs on a cache miss (once per
     account per _STATS_TTL_SECONDS), not on every sidebar render.
 
-    Subscriber count: GET /subscribers uses CURSOR pagination — confirmed
-    live, its `meta` never carries a `total` field (only
-    next_cursor/prev_cursor), unlike page-based endpoints. The documented
-    GET /subscribers/count also 404s live despite being in MailerLite's own
-    docs outline — not usable. So we pull one page at MailerLite's max page
-    size (1000, confirmed live) and show the exact count when it all fits,
-    or "N+" when a next_cursor says there's more.
-
-    Campaigns: GET /campaigns IS page-based and DOES carry an exact
-    meta.total + meta.aggregations (confirmed live) — used as-is, no
-    approximation needed.
+    Only fetches what's actually shown: the most recently sent campaign's
+    subject + its exact opens_count/clicks_count. MailerLite returns sent
+    campaigns newest-first with no sort param needed (confirmed live), so
+    row 0 is always the most recently sent one. (Subscriber count and
+    sent/total campaign counters were dropped from the sidebar entirely —
+    the subscriber figure could only ever be an approximate "N+" since
+    MailerLite has no exact total for that endpoint, and neither number
+    added real value once Last Campaign was in place.)
     """
-    subs = await ml_get(ctx, active_key, "subscribers", params={"limit": 1000})
-    sub_rows = subs.get("data") or []
-    has_more = bool((subs.get("meta") or {}).get("next_cursor"))
-    subscriber_display = f"{len(sub_rows):,}" + ("+" if has_more else "")
-
     campaigns = await ml_get(ctx, active_key, "campaigns", params={
-        "limit": validate_campaigns_limit(10), "filter[status]": "sent",
+        "limit": validate_campaigns_limit(1), "filter[status]": "sent",
     })
-    camp_meta = campaigns.get("meta") or {}
-    sent_campaigns = camp_meta.get("total", 0)
-    total_campaigns = (camp_meta.get("aggregations") or {}).get("all", sent_campaigns)
-
-    # MailerLite returns sent campaigns newest-first with no sort param
-    # needed (confirmed live) — row 0 is the most recently sent campaign.
     camp_rows = campaigns.get("data") or []
     last_name = ""
     last_opens = 0
@@ -74,9 +60,6 @@ async def _fetch_sidebar_stats(ctx, active_key: str, active_label: str) -> Sideb
 
     return SidebarStats(
         account_label=active_label,
-        subscriber_display=subscriber_display,
-        sent_campaigns=sent_campaigns,
-        total_campaigns=total_campaigns,
         last_campaign_name=last_name,
         last_campaign_opens=last_opens,
         last_campaign_clicks=last_clicks,
@@ -151,22 +134,17 @@ async def sidebar_panel(ctx, show_add: bool = False):
 
     campaigns_section: list[ui.UINode] = []
     try:
-        # Quick-stats (subscriber count, sent/total campaigns) used to hit
-        # the live MailerLite API on EVERY sidebar render. That's both
-        # wasteful and was the root cause of the earlier stale-"0" bug's
-        # sibling complaint: no reason to re-fetch a number that only
-        # changes over minutes/hours. ctx.skeleton is off-limits from panel
-        # context (guarded to @ext.skeleton only), so we use ctx.cache —
-        # the panel-facing equivalent: refreshes once per
-        # _STATS_TTL_SECONDS window instead of on every open.
+        # "Last Campaign" quick-stats used to hit the live MailerLite API
+        # on EVERY sidebar render. That's wasteful — no reason to re-fetch
+        # a number that only changes over minutes/hours. ctx.skeleton is
+        # off-limits from panel context (guarded to @ext.skeleton only),
+        # so we use ctx.cache — the panel-facing equivalent: refreshes once
+        # per _STATS_TTL_SECONDS window instead of on every open.
         stats = await ctx.cache.get_or_fetch(
             _stats_cache_key(active_label), SidebarStats,
             lambda: _fetch_sidebar_stats(ctx, active_key, active_label),
             ttl_seconds=_STATS_TTL_SECONDS,
         )
-        subscriber_total = stats.subscriber_display
-        sent_campaigns = stats.sent_campaigns
-        total_campaigns = stats.total_campaigns
         last_campaign_name = stats.last_campaign_name
         last_campaign_opens = stats.last_campaign_opens
         last_campaign_clicks = stats.last_campaign_clicks
@@ -223,10 +201,6 @@ async def sidebar_panel(ctx, show_add: bool = False):
         ui.Button(label="Add another account", icon="Plus", variant="outline",
                   on_click=ui.Call("__panel__mailerlite_sidebar", show_add=True)),
         ui.Divider(),
-        ui.Stats(children=[
-            ui.Stat(label="Subscribers", value=subscriber_total, icon="Users"),
-            ui.Stat(label="Campaigns sent", value=f"{sent_campaigns}/{total_campaigns}", icon="Send"),
-        ]),
         *([
             ui.Divider(),
             ui.Text(content=f"Last Campaign: {last_campaign_name}", variant="caption"),

@@ -14,7 +14,7 @@ py-modules = [
     "handlers_accounts", "handlers_subscribers", "handlers_groups_segments",
     "handlers_campaigns", "handlers_automations", "handlers_forms_fields",
     "handlers_webhooks_reference", "handlers_capability",
-    "skeleton", "panels",
+    "skeleton", "panels", "panels_workspace",
 ]
 
 [tool.pytest.ini_options]

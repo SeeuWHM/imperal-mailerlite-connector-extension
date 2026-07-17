@@ -3868,6 +3868,15 @@
       "refresh": "on_event:mailerlite.account.connected,mailerlite.account.switched,mailerlite.account.disconnected",
       "center_overlay": false,
       "default_width": 260
+    },
+    {
+      "panel_id": "mailerlite_workspace",
+      "slot": "center",
+      "title": "MailerLite",
+      "tree": {},
+      "icon": "Mail",
+      "refresh": "manual",
+      "center_overlay": false
     }
   ]
 }

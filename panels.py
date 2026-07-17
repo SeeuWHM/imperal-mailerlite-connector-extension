@@ -1,8 +1,12 @@
 """MailerLite sidebar panel — connect form when nothing's connected;
-account selector + quick stats when connected. No OAuth here (MailerLite
-issues a plain per-user API key) — same shape as
+account selector + quick stats + a recent-campaigns list when connected.
+No OAuth here (MailerLite issues a plain per-user API key) — same shape as
 bing-webmaster-connector/panels.py (password-masked form + multi-account
 selector, active one marked, click to switch).
+
+Campaign list items open the center workspace (panels_workspace.py) — the
+same "click a sidebar row -> open center dashboard" pattern as the GSC/Bing/
+SE Ranking connectors' sidebars, so the center slot isn't a dead empty pane.
 """
 from __future__ import annotations
 
@@ -10,7 +14,9 @@ from imperal_sdk import ui
 
 from app import ext
 from accounts import _active_account, _all_accounts, mailerlite_ready
-from ml_api import ml_get, MailerLiteError
+from ml_api import ml_get, MailerLiteError, validate_campaigns_limit
+
+_SIDEBAR_CAMPAIGNS_LIMIT = 8
 
 
 def _key_form(error: str = "") -> list[ui.UINode]:
@@ -81,11 +87,34 @@ async def sidebar_panel(ctx, show_add: bool = False):
 
     subscriber_total = None
     group_total = None
+    campaigns_section: list[ui.UINode] = []
     try:
         subs = await ml_get(ctx, active_key, "subscribers", params={"limit": 1})
         subscriber_total = (subs.get("meta") or {}).get("total")
         groups = await ml_get(ctx, active_key, "groups", params={"limit": 1})
         group_total = (groups.get("meta") or {}).get("total")
+        campaigns = await ml_get(ctx, active_key, "campaigns", params={
+            "limit": validate_campaigns_limit(_SIDEBAR_CAMPAIGNS_LIMIT),
+            "filter[status]": "sent",
+        })
+        camp_rows = campaigns.get("data") or []
+        if camp_rows:
+            campaigns_section = [
+                ui.Divider(),
+                ui.Text(content=f"Recent campaigns ({len(camp_rows)})", variant="caption"),
+                ui.List(items=[
+                    ui.ListItem(
+                        id=str(r.get("id", "")),
+                        title=((r.get("emails") or [{}])[0].get("subject") or r.get("name") or "(no subject)"),
+                        subtitle=f"{(r.get('stats') or {}).get('sent', 0)} sent",
+                        badge=ui.Badge(label=((r.get("stats") or {}).get("open_rate") or {}).get("string", ""), color="green"),
+                        on_click=ui.Call("__panel__mailerlite_workspace", campaign_id=str(r.get("id", ""))),
+                    )
+                    for r in camp_rows
+                ]),
+                ui.Button(label="Open dashboard", icon="LayoutDashboard", variant="outline", size="sm",
+                          on_click=ui.Call("__panel__mailerlite_workspace")),
+            ]
     except MailerLiteError as e:
         return ui.Stack(children=[
             ui.Header(text="MailerLite", level=4),
@@ -96,7 +125,7 @@ async def sidebar_panel(ctx, show_add: bool = False):
             ui.List(items=_account_items(accounts)) if accounts else ui.Empty(message="No accounts"),
         ])
 
-    return ui.Stack(children=[
+    root = ui.Stack(children=[
         ui.Header(text="MailerLite", level=4),
         ui.Badge(label="● connected", color="green"),
         ui.Divider(),
@@ -116,5 +145,11 @@ async def sidebar_panel(ctx, show_add: bool = False):
             ui.Stat(label="Subscribers", value=str(subscriber_total or 0), icon="Users"),
             ui.Stat(label="Groups", value=str(group_total or 0), icon="Folder"),
         ]),
+        *campaigns_section,
         ui.Text(content=f"{active_label} — connected", variant="caption"),
     ])
+    # Claim the center slot so opening this panel also opens the campaign
+    # dashboard there instead of leaving it an empty pane — same fix
+    # GSC/SE Ranking's sidebars needed.
+    root.props["auto_action"] = ui.Call("__panel__mailerlite_workspace").to_dict()
+    return root

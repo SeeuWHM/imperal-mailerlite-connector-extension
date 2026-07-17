@@ -13,7 +13,7 @@ for _m in list(sys.modules):
               "handlers_accounts", "handlers_subscribers", "handlers_groups_segments",
               "handlers_campaigns", "handlers_automations", "handlers_forms_fields",
               "handlers_webhooks_reference", "handlers_capability",
-              "skeleton", "panels"):
+              "skeleton", "panels", "panels_workspace"):
         del sys.modules[_m]
 
 from app import ext, chat  # noqa: E402, F401
@@ -28,3 +28,4 @@ import handlers_forms_fields          # noqa: E402, F401
 import handlers_webhooks_reference    # noqa: E402, F401
 import handlers_capability            # noqa: E402, F401
 import panels                         # noqa: E402, F401
+import panels_workspace               # noqa: E402, F401

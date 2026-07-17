@@ -34,7 +34,7 @@
     },
     {
       "name": "connection_status",
-      "description": "Whether the user's own MailerLite API key is connected. Use for: подключен ли MailerLite, is my MailerLite account connected, connection status.",
+      "description": "Whether the user's own MailerLite API key is connected. Use for: is my MailerLite account connected, connection status.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -69,7 +69,7 @@
     },
     {
       "name": "save_mailerlite_key",
-      "description": "Connect a MailerLite account by saving its API key. Validates the key against MailerLite before saving. Use for: подключи MailerLite, connect my MailerLite account, save this API key.",
+      "description": "Connect a MailerLite account by saving its API key. Validates the key against MailerLite before saving. Use for: connect my MailerLite account, save this API key.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -273,7 +273,7 @@
     },
     {
       "name": "list_subscribers",
-      "description": "List subscribers, optionally filtered by status (active/unsubscribed/unconfirmed/bounced/junk). Use for: покажи подписчиков, list my subscribers, show active subscribers.",
+      "description": "List subscribers, optionally filtered by status (active/unsubscribed/unconfirmed/bounced/junk). Use for: list my subscribers, show active subscribers.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -437,7 +437,7 @@
     },
     {
       "name": "create_fill_subscriber",
-      "description": "Create or update (upsert) a subscriber by email. Non-destructive — omitted fields/groups are NOT removed from an existing subscriber. Use for: добавь подписчика, add this email to my list.",
+      "description": "Create or update (upsert) a subscriber by email. Non-destructive — omitted fields/groups are NOT removed from an existing subscriber. Use for: add this email to my list.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -580,7 +580,7 @@
     },
     {
       "name": "get_subscriber",
-      "description": "Fetch one subscriber by id. Use for: покажи подписчика, get subscriber details.",
+      "description": "Fetch one subscriber by id. Use for: get subscriber details.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -694,7 +694,7 @@
     },
     {
       "name": "subscriber_activity",
-      "description": "A subscriber's engagement activity (opens, clicks, etc). Use for: активность подписчика, subscriber engagement history.",
+      "description": "A subscriber's engagement activity (opens, clicks, etc). Use for: subscriber engagement history.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -772,7 +772,7 @@
     },
     {
       "name": "add_subscriber_to_group",
-      "description": "Assign an existing subscriber to a group. Use for: добавь подписчика в группу.",
+      "description": "Assign an existing subscriber to a group.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -818,7 +818,7 @@
     },
     {
       "name": "remove_subscriber_from_group",
-      "description": "Remove a subscriber from a group. Use for: убери подписчика из группы.",
+      "description": "Remove a subscriber from a group.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -864,7 +864,7 @@
     },
     {
       "name": "delete_subscriber",
-      "description": "Permanently delete a subscriber. Use for: удали подписчика.",
+      "description": "Permanently delete a subscriber.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -904,7 +904,7 @@
     },
     {
       "name": "forget_subscriber",
-      "description": "GDPR 'right to be forgotten': permanently erases this subscriber's personal data (distinct from delete_subscriber, which just removes the record — forget is MailerLite's own compliance endpoint, POST /subscribers/{id}/forget, confirmed via MailerLite's official SDK source). Use for: удали данные подписчика по gdpr, forget this subscriber, right to be forgotten.",
+      "description": "GDPR 'right to be forgotten': permanently erases this subscriber's personal data (distinct from delete_subscriber, which just removes the record — forget is MailerLite's own compliance endpoint, POST /subscribers/{id}/forget, confirmed via MailerLite's official SDK source). Use for: forget this subscriber, right to be forgotten.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -944,7 +944,7 @@
     },
     {
       "name": "list_groups",
-      "description": "List mailing groups. Use for: покажи группы, list my groups.",
+      "description": "List mailing groups. Use for: list my groups.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -1055,7 +1055,7 @@
     },
     {
       "name": "create_group",
-      "description": "Create a new mailing group. Use for: создай группу, new group called X.",
+      "description": "Create a new mailing group. Use for: new group called X.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -1131,7 +1131,7 @@
     },
     {
       "name": "rename_group",
-      "description": "Rename a group. Use for: переименуй группу.",
+      "description": "Rename an existing mailing group.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -1212,7 +1212,7 @@
     },
     {
       "name": "delete_group",
-      "description": "Permanently delete a group (subscribers stay, just un-grouped). Use for: удали группу.",
+      "description": "Permanently delete a group (subscribers stay, just un-grouped).",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -1252,7 +1252,7 @@
     },
     {
       "name": "group_subscribers",
-      "description": "List subscribers belonging to a group. Use for: покажи подписчиков группы.",
+      "description": "List subscribers belonging to a group.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -1422,7 +1422,7 @@
     },
     {
       "name": "list_segments",
-      "description": "List dynamic subscriber segments. NOTE: segment filter rules are built in the MailerLite UI only — this extension can list/rename/delete existing segments but not author new filter logic. Use for: покажи сегменты, list my segments.",
+      "description": "List dynamic subscriber segments. NOTE: segment filter rules are built in the MailerLite UI only — this extension can list/rename/delete existing segments but not author new filter logic. Use for: list my segments.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -1515,7 +1515,7 @@
     },
     {
       "name": "rename_segment",
-      "description": "Rename a segment (filter rules themselves can't be edited via API). Use for: переименуй сегмент.",
+      "description": "Rename a segment (filter rules themselves can't be edited via API).",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -1591,7 +1591,7 @@
     },
     {
       "name": "delete_segment",
-      "description": "Permanently delete a segment. Use for: удали сегмент.",
+      "description": "Permanently delete a segment.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -1631,7 +1631,7 @@
     },
     {
       "name": "segment_subscribers",
-      "description": "List subscribers matching a segment's rules. Use for: покажи подписчиков сегмента.",
+      "description": "List subscribers matching a segment's rules.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -1799,7 +1799,7 @@
     },
     {
       "name": "list_campaigns",
-      "description": "List campaigns filtered by status (sent/draft/ready) and/or type (regular/ab/resend/rss). Use for: покажи мои кампании, list my campaigns, show draft/sent campaigns.",
+      "description": "List campaigns filtered by status (sent/draft/ready) and/or type (regular/ab/resend/rss). Use for: list my campaigns, show draft/sent campaigns.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -1931,7 +1931,7 @@
     },
     {
       "name": "get_campaign",
-      "description": "Fetch one campaign by id. Use for: покажи кампанию, get this campaign.",
+      "description": "Fetch one campaign by id. Use for: get this campaign.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -2013,7 +2013,7 @@
     },
     {
       "name": "create_campaign",
-      "description": "Create a draft campaign. type='resend'/'multivariate' and content_html both carry a REAL risk of being rejected on lower MailerLite plans — any such rejection is surfaced with MailerLite's own exact wording, never guessed. Use for: создай кампанию, draft a new campaign called X.",
+      "description": "Create a draft campaign. type='resend'/'multivariate' and content_html both carry a REAL risk of being rejected on lower MailerLite plans — any such rejection is surfaced with MailerLite's own exact wording, never guessed. Use for: draft a new campaign called X.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -2148,7 +2148,7 @@
     },
     {
       "name": "schedule_campaign",
-      "description": "Schedule a ready campaign to send (or send it instantly with delivery='instant'). Use for: отправь кампанию, schedule this campaign for tomorrow, send now.",
+      "description": "Schedule a ready campaign to send (or send it instantly with delivery='instant'). Use for: schedule this campaign for tomorrow, send now.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -2300,7 +2300,7 @@
     },
     {
       "name": "cancel_campaign",
-      "description": "Cancel a campaign that's currently in 'ready' state (queued to send). Use for: отмени кампанию, cancel this send.",
+      "description": "Cancel a campaign that's currently in 'ready' state (queued to send). Use for: cancel this send.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -2384,7 +2384,7 @@
     },
     {
       "name": "delete_campaign",
-      "description": "Permanently delete a campaign. Use for: удали кампанию, delete this campaign.",
+      "description": "Permanently delete a campaign. Use for: delete this campaign.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -2424,7 +2424,7 @@
     },
     {
       "name": "list_automations",
-      "description": "List automations (name, enabled/disabled, created date) — read-only. MailerLite's API can't build or edit automation steps; those are UI-only. Use for: покажи мои автоматизации, list my automations, show automation workflows.",
+      "description": "List automations (name, enabled/disabled, created date) — read-only. MailerLite's API can't build or edit automation steps; those are UI-only. Use for: list my automations, show automation workflows.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -2526,7 +2526,7 @@
     },
     {
       "name": "get_automation",
-      "description": "Fetch one automation's basic info by id. Use for: покажи автоматизацию, get this automation.",
+      "description": "Fetch one automation's basic info by id. Use for: get this automation.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -2579,7 +2579,7 @@
     },
     {
       "name": "automation_activity",
-      "description": "Subscriber activity flowing through an automation, filtered by status (completed/active/canceled/failed — required). Use for: покажи активность автоматизации, who's in this automation, automation subscriber activity.",
+      "description": "Subscriber activity flowing through an automation, filtered by status (completed/active/canceled/failed — required). Use for: who's in this automation, automation subscriber activity.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -2677,7 +2677,7 @@
     },
     {
       "name": "create_automation_draft",
-      "description": "Create an EMPTY draft automation (name only) — MailerLite's API can't define triggers/steps, so the user still needs to open MailerLite's UI to actually build the workflow. Use for: создай черновик автоматизации, create a draft automation shell.",
+      "description": "Create an EMPTY draft automation (name only) — MailerLite's API can't define triggers/steps, so the user still needs to open MailerLite's UI to actually build the workflow. Use for: create a draft automation shell.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -2733,7 +2733,7 @@
     },
     {
       "name": "delete_automation",
-      "description": "Permanently delete an automation. Use for: удали автоматизацию, delete this automation.",
+      "description": "Permanently delete an automation. Use for: delete this automation.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -2773,7 +2773,7 @@
     },
     {
       "name": "list_forms",
-      "description": "List forms of one type: popup, embedded, or promotion (required — MailerLite has no combined 'all forms' endpoint). Use for: покажи мои формы, list my popup/embedded forms.",
+      "description": "List forms of one type: popup, embedded, or promotion (required — MailerLite has no combined 'all forms' endpoint). Use for: list my popup/embedded forms.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -2881,7 +2881,7 @@
     },
     {
       "name": "rename_form",
-      "description": "Rename a form. Use for: переименуй форму, rename this form.",
+      "description": "Rename a form. Use for: rename this form.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -2947,7 +2947,7 @@
     },
     {
       "name": "delete_form",
-      "description": "Permanently delete a form. Use for: удали форму, delete this form.",
+      "description": "Permanently delete a form. Use for: delete this form.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -2987,7 +2987,7 @@
     },
     {
       "name": "form_subscribers",
-      "description": "List subscribers who signed up via a specific form. Use for: кто подписался через форму, subscribers from this form.",
+      "description": "List subscribers who signed up via a specific form. Use for: subscribers from this form.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -3155,7 +3155,7 @@
     },
     {
       "name": "list_fields",
-      "description": "List custom subscriber fields (text/number/date). Use for: покажи кастомные поля, list custom fields.",
+      "description": "List custom subscriber fields (text/number/date). Use for: list custom fields.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -3241,7 +3241,7 @@
     },
     {
       "name": "create_field",
-      "description": "Create a custom subscriber field (type: text, number, or date). Use for: создай кастомное поле, add a custom field.",
+      "description": "Create a custom subscriber field (type: text, number, or date). Use for: add a custom field.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -3298,7 +3298,7 @@
     },
     {
       "name": "rename_field",
-      "description": "Rename a custom field. Use for: переименуй поле, rename this field.",
+      "description": "Rename a custom field. Use for: rename this field.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -3354,7 +3354,7 @@
     },
     {
       "name": "delete_field",
-      "description": "Permanently delete a custom field. Use for: удали поле, delete this field.",
+      "description": "Permanently delete a custom field. Use for: delete this field.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -3394,7 +3394,7 @@
     },
     {
       "name": "list_webhooks",
-      "description": "List configured webhooks. Use for: покажи вебхуки, list my webhooks.",
+      "description": "List configured webhooks. Use for: list my webhooks.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -3464,7 +3464,7 @@
     },
     {
       "name": "create_webhook",
-      "description": "Create a webhook for a MailerLite event (e.g. subscriber.created, campaign.sent — see MailerLite docs for the full event list). campaign.click/campaign.open/subscriber.deleted REQUIRE batchable=true (MailerLite's own requirement). Use for: создай вебхук, add a webhook for this event.",
+      "description": "Create a webhook for a MailerLite event (e.g. subscriber.created, campaign.sent — see MailerLite docs for the full event list). campaign.click/campaign.open/subscriber.deleted REQUIRE batchable=true (MailerLite's own requirement). Use for: add a webhook for this event.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -3546,7 +3546,7 @@
     },
     {
       "name": "delete_webhook",
-      "description": "Permanently delete a webhook. Use for: удали вебхук, delete this webhook.",
+      "description": "Permanently delete a webhook. Use for: delete this webhook.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -3586,7 +3586,7 @@
     },
     {
       "name": "list_campaign_languages",
-      "description": "List valid language_id values for campaign unsubscribe-page language. Use for: какие языки доступны для кампании.",
+      "description": "List valid language_id values for campaign unsubscribe-page language.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -3646,7 +3646,7 @@
     },
     {
       "name": "list_timezones",
-      "description": "List valid timezone_id values for scheduling campaigns. Use for: какие таймзоны доступны.",
+      "description": "List valid timezone_id values for scheduling campaigns.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -3701,7 +3701,7 @@
     },
     {
       "name": "mailerlite_capability_status",
-      "description": "Show this MailerLite account's REAL plan (name, price, subscriber tier, smart-sending flag — read directly from MailerLite's own account endpoint) plus any capability restrictions actually observed from live API responses, and MailerLite's own documented plan gates for things the account endpoint doesn't itself describe (e.g. whether HTML campaign content is unlocked at this tier). Use for: какой у меня план MailerLite, what MailerLite features am I limited to, plan limits, сколько стоит мой план mailerlite.",
+      "description": "Show this MailerLite account's REAL plan (name, price, subscriber tier, smart-sending flag — read directly from MailerLite's own account endpoint) plus any capability restrictions actually observed from live API responses, and MailerLite's own documented plan gates for things the account endpoint doesn't itself describe (e.g. whether HTML campaign content is unlocked at this tier). Use for: what MailerLite features am I limited to, plan limits.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],

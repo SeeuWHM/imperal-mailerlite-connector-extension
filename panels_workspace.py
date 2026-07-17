@@ -50,9 +50,16 @@ def _retry_button() -> ui.UINode:
     the user with zero clickable path back (the actual bug behind \"back to
     overview\"/\"open dashboard\" doing nothing for one particular connected
     account: its campaigns call failed and the error screen had no button
-    at all, not even a broken one)."""
+    at all, not even a broken one).
+
+    campaign_id="" is passed EXPLICITLY (not omitted) — the platform carries
+    forward the previous render's params into the next __panel__ call when a
+    key is left out, so omitting campaign_id here would silently re-open the
+    same detail view instead of the overview (confirmed platform behaviour,
+    see mail-client/CHANGELOG.md \"param accumulation\" and \"stale account
+    after pagination\" fixes)."""
     return ui.Button(label="↻ Retry", variant="outline", size="sm",
-                      on_click=ui.Call("__panel__mailerlite_workspace"))
+                      on_click=ui.Call("__panel__mailerlite_workspace", campaign_id=""))
 
 
 async def _overview(ctx, key: str) -> ui.UINode:
@@ -133,8 +140,11 @@ async def _overview(ctx, key: str) -> ui.UINode:
 
 
 async def _detail(ctx, key: str, campaign_id: str) -> ui.UINode:
+    # campaign_id="" must be explicit — see _retry_button's docstring: the
+    # platform re-uses the previous render's campaign_id if this key is
+    # omitted, which is exactly why this button silently did nothing.
     back_btn = ui.Button(label="← Back to overview", variant="ghost", size="sm",
-                          on_click=ui.Call("__panel__mailerlite_workspace"))
+                          on_click=ui.Call("__panel__mailerlite_workspace", campaign_id=""))
     try:
         data = await ml_get(ctx, key, f"campaigns/{campaign_id}")
     except MailerLiteError as e:

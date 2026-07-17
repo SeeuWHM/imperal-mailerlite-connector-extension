@@ -33,7 +33,7 @@ def _to_automation(row: dict) -> AutomationRecord:
     "list_automations", action_type="read", chain_callable=True, data_model=AutomationList,
     description=(
         "List automations (name, enabled/disabled, created date) — read-only. MailerLite's API can't "
-        "build or edit automation steps; those are UI-only. Use for: покажи мои автоматизации, list my "
+        "build or edit automation steps; those are UI-only. Use for: list my "
         "automations, show automation workflows."
     ),
 )
@@ -56,7 +56,7 @@ async def fn_list_automations(ctx, params: ListAutomationsParams) -> ActionResul
 
 @chat.function(
     "get_automation", action_type="read", chain_callable=True, data_model=AutomationRecord,
-    description="Fetch one automation's basic info by id. Use for: покажи автоматизацию, get this automation.",
+    description="Fetch one automation's basic info by id. Use for: get this automation.",
 )
 async def fn_get_automation(ctx, params: AutomationIdParams) -> ActionResult:
     """Fetch one automation's basic info by id."""
@@ -72,7 +72,7 @@ async def fn_get_automation(ctx, params: AutomationIdParams) -> ActionResult:
     "automation_activity", action_type="read", chain_callable=True, data_model=AutomationActivityList,
     description=(
         "Subscriber activity flowing through an automation, filtered by status (completed/active/"
-        "canceled/failed — required). Use for: покажи активность автоматизации, who's in this automation, "
+        "canceled/failed — required). Use for: who's in this automation, "
         "automation subscriber activity."
     ),
 )
@@ -105,7 +105,7 @@ async def fn_automation_activity(ctx, params: AutomationActivityParams) -> Actio
     description=(
         "Create an EMPTY draft automation (name only) — MailerLite's API can't define triggers/steps, "
         "so the user still needs to open MailerLite's UI to actually build the workflow. Use for: "
-        "создай черновик автоматизации, create a draft automation shell."
+        "create a draft automation shell."
     ),
 )
 async def fn_create_automation_draft(ctx, params: CreateAutomationDraftParams) -> ActionResult:
@@ -126,7 +126,7 @@ async def fn_create_automation_draft(ctx, params: CreateAutomationDraftParams) -
 @chat.function(
     "delete_automation", action_type="destructive", event="mailerlite.automation.deleted",
     effects=["delete:automation"], data_model=DeletedResponse,
-    description="Permanently delete an automation. Use for: удали автоматизацию, delete this automation.",
+    description="Permanently delete an automation. Use for: delete this automation.",
 )
 async def fn_delete_automation(ctx, params: AutomationIdParams) -> ActionResult:
     """Permanently delete an automation."""

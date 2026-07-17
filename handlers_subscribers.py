@@ -41,7 +41,7 @@ def _to_subscriber(row: dict) -> SubscriberRecord:
     "list_subscribers", action_type="read", chain_callable=True, data_model=SubscriberList,
     description=(
         "List subscribers, optionally filtered by status (active/unsubscribed/unconfirmed/bounced/junk). "
-        "Use for: покажи подписчиков, list my subscribers, show active subscribers."
+        "Use for: list my subscribers, show active subscribers."
     ),
 )
 async def fn_list_subscribers(ctx, params: ListSubscribersParams) -> ActionResult:
@@ -69,7 +69,7 @@ async def fn_list_subscribers(ctx, params: ListSubscribersParams) -> ActionResul
     effects=["create:subscriber"], data_model=SubscriberRecord,
     description=(
         "Create or update (upsert) a subscriber by email. Non-destructive — omitted fields/groups are NOT "
-        "removed from an existing subscriber. Use for: добавь подписчика, add this email to my list."
+        "removed from an existing subscriber. Use for: add this email to my list."
     ),
 )
 async def fn_upsert_subscriber(ctx, params: UpsertSubscriberParams) -> ActionResult:
@@ -92,7 +92,7 @@ async def fn_upsert_subscriber(ctx, params: UpsertSubscriberParams) -> ActionRes
 
 @chat.function(
     "get_subscriber", action_type="read", chain_callable=True, data_model=SubscriberRecord,
-    description="Fetch one subscriber by id. Use for: покажи подписчика, get subscriber details.",
+    description="Fetch one subscriber by id. Use for: get subscriber details.",
 )
 async def fn_get_subscriber(ctx, params: SubscriberIdParams) -> ActionResult:
     """Fetch one subscriber by id."""
@@ -108,7 +108,7 @@ async def fn_get_subscriber(ctx, params: SubscriberIdParams) -> ActionResult:
 @chat.function(
     "subscriber_activity", action_type="read", chain_callable=True, data_model=SubscriberActivityList,
     description=(
-        "A subscriber's engagement activity (opens, clicks, etc). Use for: активность подписчика, "
+        "A subscriber's engagement activity (opens, clicks, etc). Use for: "
         "subscriber engagement history."
     ),
 )
@@ -141,7 +141,7 @@ async def fn_subscriber_activity(ctx, params: SubscriberIdParams) -> ActionResul
 @chat.function(
     "add_subscriber_to_group", action_type="write", event="mailerlite.subscriber.grouped",
     effects=["update:subscriber"], data_model=DeletedResponse,
-    description="Assign an existing subscriber to a group. Use for: добавь подписчика в группу.",
+    description="Assign an existing subscriber to a group.",
 )
 async def fn_add_subscriber_to_group(ctx, params: GroupSubscriberParams) -> ActionResult:
     """Assign an existing subscriber to a group."""
@@ -156,7 +156,7 @@ async def fn_add_subscriber_to_group(ctx, params: GroupSubscriberParams) -> Acti
 @chat.function(
     "remove_subscriber_from_group", action_type="write", event="mailerlite.subscriber.ungrouped",
     effects=["update:subscriber"], data_model=DeletedResponse,
-    description="Remove a subscriber from a group. Use for: убери подписчика из группы.",
+    description="Remove a subscriber from a group.",
 )
 async def fn_remove_subscriber_from_group(ctx, params: GroupSubscriberParams) -> ActionResult:
     """Remove a subscriber from a group."""
@@ -171,7 +171,7 @@ async def fn_remove_subscriber_from_group(ctx, params: GroupSubscriberParams) ->
 @chat.function(
     "delete_subscriber", action_type="destructive", event="mailerlite.subscriber.deleted",
     effects=["delete:subscriber"], data_model=DeletedResponse,
-    description="Permanently delete a subscriber. Use for: удали подписчика.",
+    description="Permanently delete a subscriber.",
 )
 async def fn_delete_subscriber(ctx, params: SubscriberIdParams) -> ActionResult:
     """Permanently delete a subscriber."""
@@ -190,7 +190,7 @@ async def fn_delete_subscriber(ctx, params: SubscriberIdParams) -> ActionResult:
         "GDPR 'right to be forgotten': permanently erases this subscriber's personal data (distinct "
         "from delete_subscriber, which just removes the record — forget is MailerLite's own compliance "
         "endpoint, POST /subscribers/{id}/forget, confirmed via MailerLite's official SDK source). "
-        "Use for: удали данные подписчика по gdpr, forget this subscriber, right to be forgotten."
+        "Use for: forget this subscriber, right to be forgotten."
     ),
 )
 async def fn_forget_subscriber(ctx, params: SubscriberIdParams) -> ActionResult:

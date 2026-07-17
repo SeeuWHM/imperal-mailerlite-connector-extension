@@ -32,7 +32,7 @@ def _to_webhook(row: dict) -> WebhookRecord:
 
 @chat.function(
     "list_webhooks", action_type="read", chain_callable=True, data_model=WebhookList,
-    description="List configured webhooks. Use for: покажи вебхуки, list my webhooks.",
+    description="List configured webhooks. Use for: list my webhooks.",
 )
 async def fn_list_webhooks(ctx, params: EmptyParams) -> ActionResult:
     """List configured webhooks."""
@@ -52,7 +52,7 @@ async def fn_list_webhooks(ctx, params: EmptyParams) -> ActionResult:
     description=(
         "Create a webhook for a MailerLite event (e.g. subscriber.created, campaign.sent — see MailerLite "
         "docs for the full event list). campaign.click/campaign.open/subscriber.deleted REQUIRE batchable=true "
-        "(MailerLite's own requirement). Use for: создай вебхук, add a webhook for this event."
+        "(MailerLite's own requirement). Use for: add a webhook for this event."
     ),
 )
 async def fn_create_webhook(ctx, params: CreateWebhookParams) -> ActionResult:
@@ -71,7 +71,7 @@ async def fn_create_webhook(ctx, params: CreateWebhookParams) -> ActionResult:
 
 @chat.function(
     "delete_webhook", action_type="destructive", event="mailerlite.webhook.deleted", effects=["delete:webhook"],
-    data_model=DeletedResponse, description="Permanently delete a webhook. Use for: удали вебхук, delete this webhook.",
+    data_model=DeletedResponse, description="Permanently delete a webhook. Use for: delete this webhook.",
 )
 async def fn_delete_webhook(ctx, params: WebhookIdParams) -> ActionResult:
     """Permanently delete a webhook."""
@@ -87,7 +87,7 @@ async def fn_delete_webhook(ctx, params: WebhookIdParams) -> ActionResult:
 
 @chat.function(
     "list_campaign_languages", action_type="read", chain_callable=True, data_model=LanguageList,
-    description="List valid language_id values for campaign unsubscribe-page language. Use for: какие языки доступны для кампании.",
+    description="List valid language_id values for campaign unsubscribe-page language.",
 )
 async def fn_list_campaign_languages(ctx, params: EmptyParams) -> ActionResult:
     """List valid language_id values for campaign unsubscribe-page language."""
@@ -106,7 +106,7 @@ async def fn_list_campaign_languages(ctx, params: EmptyParams) -> ActionResult:
 
 @chat.function(
     "list_timezones", action_type="read", chain_callable=True, data_model=TimezoneList,
-    description="List valid timezone_id values for scheduling campaigns. Use for: какие таймзоны доступны.",
+    description="List valid timezone_id values for scheduling campaigns.",
 )
 async def fn_list_timezones(ctx, params: EmptyParams) -> ActionResult:
     """List valid timezone_id values for scheduling campaigns."""

@@ -71,8 +71,7 @@ chat = ChatExtension(
     description=(
         "MailerLite — email marketing platform. Use for: subscribers, mailing "
         "groups/segments, email campaigns, automations, signup forms, custom "
-        "fields, webhooks. рассылки, подписчики, группы, сегменты, кампании, "
-        "автоматизации, формы, вебхуки mailerlite."
+        "fields, webhooks."
     ),
 )
 

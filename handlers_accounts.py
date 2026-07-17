@@ -28,7 +28,7 @@ def _build_accounts_list(accounts: list[dict]) -> AccountsList:
 @chat.function(
     "connection_status", action_type="read", chain_callable=True, data_model=ConnectionStatus,
     description=(
-        "Whether the user's own MailerLite API key is connected. Use for: подключен ли MailerLite, "
+        "Whether the user's own MailerLite API key is connected. Use for: "
         "is my MailerLite account connected, connection status."
     ),
 )
@@ -46,7 +46,7 @@ async def fn_connection_status(ctx, params: EmptyParams) -> ActionResult:
     effects=["create:secret"], data_model=AccountRecord,
     description=(
         "Connect a MailerLite account by saving its API key. Validates the key against MailerLite before "
-        "saving. Use for: подключи MailerLite, connect my MailerLite account, save this API key."
+        "saving. Use for: connect my MailerLite account, save this API key."
     ),
 )
 async def fn_save_mailerlite_key(ctx, params: SaveKeyParams) -> ActionResult:

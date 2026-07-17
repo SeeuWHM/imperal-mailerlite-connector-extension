@@ -113,7 +113,11 @@ async def sidebar_panel(ctx, show_add: bool = False):
                     for r in camp_rows
                 ]),
                 ui.Button(label="Open dashboard", icon="LayoutDashboard", variant="outline", size="sm",
-                          on_click=ui.Call("__panel__mailerlite_workspace")),
+                          # campaign_id="" explicit — platform carries forward
+                          # the last-opened campaign's id otherwise (param
+                          # accumulation across __panel__ calls), which is why
+                          # this button did nothing when a campaign was open.
+                          on_click=ui.Call("__panel__mailerlite_workspace", campaign_id="")),
             ]
     except MailerLiteError as e:
         return ui.Stack(children=[
@@ -151,5 +155,5 @@ async def sidebar_panel(ctx, show_add: bool = False):
     # Claim the center slot so opening this panel also opens the campaign
     # dashboard there instead of leaving it an empty pane — same fix
     # GSC/SE Ranking's sidebars needed.
-    root.props["auto_action"] = ui.Call("__panel__mailerlite_workspace").to_dict()
+    root.props["auto_action"] = ui.Call("__panel__mailerlite_workspace", campaign_id="").to_dict()
     return root

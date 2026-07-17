@@ -57,8 +57,8 @@ async def _fetch_plan(ctx, api_key: str) -> PlanInfo | None:
         "read directly from MailerLite's own account endpoint) plus any capability restrictions actually "
         "observed from live API responses, and MailerLite's own documented plan gates for things the "
         "account endpoint doesn't itself describe (e.g. whether HTML campaign content is unlocked at "
-        "this tier). Use for: какой у меня план MailerLite, what MailerLite features am I limited to, "
-        "plan limits, сколько стоит мой план mailerlite."
+        "this tier). Use for: what MailerLite features am I limited to, "
+        "plan limits."
     ),
 )
 async def fn_mailerlite_capability_status(ctx, params: EmptyParams) -> ActionResult:

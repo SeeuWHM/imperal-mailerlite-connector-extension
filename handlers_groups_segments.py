@@ -49,7 +49,7 @@ def _to_segment(row: dict) -> SegmentRecord:
 
 @chat.function(
     "list_groups", action_type="read", chain_callable=True, data_model=GroupList,
-    description="List mailing groups. Use for: покажи группы, list my groups.",
+    description="List mailing groups. Use for: list my groups.",
 )
 async def fn_list_groups(ctx, params: ListGroupsParams) -> ActionResult:
     """List mailing groups."""
@@ -69,7 +69,7 @@ async def fn_list_groups(ctx, params: ListGroupsParams) -> ActionResult:
 @chat.function(
     "create_group", action_type="write", event="mailerlite.group.created",
     effects=["create:group"], data_model=GroupRecord,
-    description="Create a new mailing group. Use for: создай группу, new group called X.",
+    description="Create a new mailing group. Use for: new group called X.",
 )
 async def fn_create_group(ctx, params: CreateGroupParams) -> ActionResult:
     """Create a new mailing group."""
@@ -85,7 +85,7 @@ async def fn_create_group(ctx, params: CreateGroupParams) -> ActionResult:
 @chat.function(
     "rename_group", action_type="write", event="mailerlite.group.updated",
     effects=["update:group"], data_model=GroupRecord,
-    description="Rename a group. Use for: переименуй группу.",
+    description="Rename an existing mailing group.",
 )
 async def fn_rename_group(ctx, params: RenameGroupParams) -> ActionResult:
     """Rename a group."""
@@ -101,7 +101,7 @@ async def fn_rename_group(ctx, params: RenameGroupParams) -> ActionResult:
 @chat.function(
     "delete_group", action_type="destructive", event="mailerlite.group.deleted",
     effects=["delete:group"], data_model=DeletedResponse,
-    description="Permanently delete a group (subscribers stay, just un-grouped). Use for: удали группу.",
+    description="Permanently delete a group (subscribers stay, just un-grouped).",
 )
 async def fn_delete_group(ctx, params: GroupIdParams) -> ActionResult:
     """Permanently delete a group (subscribers stay, just un-grouped)."""
@@ -115,7 +115,7 @@ async def fn_delete_group(ctx, params: GroupIdParams) -> ActionResult:
 
 @chat.function(
     "group_subscribers", action_type="read", chain_callable=True, data_model=SubscriberList,
-    description="List subscribers belonging to a group. Use for: покажи подписчиков группы.",
+    description="List subscribers belonging to a group.",
 )
 async def fn_group_subscribers(ctx, params: GroupSubscribersParams) -> ActionResult:
     """List subscribers belonging to a group."""
@@ -144,7 +144,7 @@ async def fn_group_subscribers(ctx, params: GroupSubscribersParams) -> ActionRes
     description=(
         "List dynamic subscriber segments. NOTE: segment filter rules are built in the MailerLite UI "
         "only — this extension can list/rename/delete existing segments but not author new filter logic. "
-        "Use for: покажи сегменты, list my segments."
+        "Use for: list my segments."
     ),
 )
 async def fn_list_segments(ctx, params: ListSegmentsParams) -> ActionResult:
@@ -162,7 +162,7 @@ async def fn_list_segments(ctx, params: ListSegmentsParams) -> ActionResult:
 @chat.function(
     "rename_segment", action_type="write", event="mailerlite.segment.updated",
     effects=["update:segment"], data_model=SegmentRecord,
-    description="Rename a segment (filter rules themselves can't be edited via API). Use for: переименуй сегмент.",
+    description="Rename a segment (filter rules themselves can't be edited via API).",
 )
 async def fn_rename_segment(ctx, params: RenameSegmentParams) -> ActionResult:
     """Rename a segment (filter rules themselves can't be edited via API)."""
@@ -178,7 +178,7 @@ async def fn_rename_segment(ctx, params: RenameSegmentParams) -> ActionResult:
 @chat.function(
     "delete_segment", action_type="destructive", event="mailerlite.segment.deleted",
     effects=["delete:segment"], data_model=DeletedResponse,
-    description="Permanently delete a segment. Use for: удали сегмент.",
+    description="Permanently delete a segment.",
 )
 async def fn_delete_segment(ctx, params: SegmentIdParams) -> ActionResult:
     """Permanently delete a segment."""
@@ -192,7 +192,7 @@ async def fn_delete_segment(ctx, params: SegmentIdParams) -> ActionResult:
 
 @chat.function(
     "segment_subscribers", action_type="read", chain_callable=True, data_model=SubscriberList,
-    description="List subscribers matching a segment's rules. Use for: покажи подписчиков сегмента.",
+    description="List subscribers matching a segment's rules.",
 )
 async def fn_segment_subscribers(ctx, params: SegmentSubscribersParams) -> ActionResult:
     """List subscribers matching a segment's rules."""

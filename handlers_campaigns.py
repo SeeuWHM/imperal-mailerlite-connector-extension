@@ -56,7 +56,7 @@ async def _record_plan_verdict_if_any(ctx, capability_key: str, e: MailerLiteErr
     "list_campaigns", action_type="read", chain_callable=True, data_model=CampaignList,
     description=(
         "List campaigns filtered by status (sent/draft/ready) and/or type (regular/ab/resend/rss). "
-        "Use for: покажи мои кампании, list my campaigns, show draft/sent campaigns."
+        "Use for: list my campaigns, show draft/sent campaigns."
     ),
 )
 async def fn_list_campaigns(ctx, params: ListCampaignsParams) -> ActionResult:
@@ -78,7 +78,7 @@ async def fn_list_campaigns(ctx, params: ListCampaignsParams) -> ActionResult:
 
 @chat.function(
     "get_campaign", action_type="read", chain_callable=True, data_model=CampaignRecord,
-    description="Fetch one campaign by id. Use for: покажи кампанию, get this campaign.",
+    description="Fetch one campaign by id. Use for: get this campaign.",
 )
 async def fn_get_campaign(ctx, params: CampaignIdParams) -> ActionResult:
     """Fetch one campaign by id."""
@@ -96,7 +96,7 @@ async def fn_get_campaign(ctx, params: CampaignIdParams) -> ActionResult:
     description=(
         "Create a draft campaign. type='resend'/'multivariate' and content_html both carry a REAL risk of "
         "being rejected on lower MailerLite plans — any such rejection is surfaced with MailerLite's own "
-        "exact wording, never guessed. Use for: создай кампанию, draft a new campaign called X."
+        "exact wording, never guessed. Use for: draft a new campaign called X."
     ),
 )
 async def fn_create_campaign(ctx, params: CreateCampaignParams) -> ActionResult:
@@ -127,7 +127,7 @@ async def fn_create_campaign(ctx, params: CreateCampaignParams) -> ActionResult:
     effects=["update:campaign"], data_model=CampaignRecord,
     description=(
         "Schedule a ready campaign to send (or send it instantly with delivery='instant'). "
-        "Use for: отправь кампанию, schedule this campaign for tomorrow, send now."
+        "Use for: schedule this campaign for tomorrow, send now."
     ),
 )
 async def fn_schedule_campaign(ctx, params: ScheduleCampaignParams) -> ActionResult:
@@ -158,7 +158,7 @@ async def fn_schedule_campaign(ctx, params: ScheduleCampaignParams) -> ActionRes
 @chat.function(
     "cancel_campaign", action_type="write", event="mailerlite.campaign.canceled",
     effects=["update:campaign"], data_model=CampaignRecord,
-    description="Cancel a campaign that's currently in 'ready' state (queued to send). Use for: отмени кампанию, cancel this send.",
+    description="Cancel a campaign that's currently in 'ready' state (queued to send). Use for: cancel this send.",
 )
 async def fn_cancel_campaign(ctx, params: CampaignIdParams) -> ActionResult:
     """Cancel a campaign that's currently in 'ready' state (queued to send)."""
@@ -175,7 +175,7 @@ async def fn_cancel_campaign(ctx, params: CampaignIdParams) -> ActionResult:
 @chat.function(
     "delete_campaign", action_type="destructive", event="mailerlite.campaign.deleted",
     effects=["delete:campaign"], data_model=DeletedResponse,
-    description="Permanently delete a campaign. Use for: удали кампанию, delete this campaign.",
+    description="Permanently delete a campaign. Use for: delete this campaign.",
 )
 async def fn_delete_campaign(ctx, params: CampaignIdParams) -> ActionResult:
     """Permanently delete a campaign."""

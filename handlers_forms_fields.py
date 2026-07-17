@@ -39,7 +39,7 @@ def _to_field(row: dict) -> FieldRecord:
     "list_forms", action_type="read", chain_callable=True, data_model=FormList,
     description=(
         "List forms of one type: popup, embedded, or promotion (required — MailerLite has no combined "
-        "'all forms' endpoint). Use for: покажи мои формы, list my popup/embedded forms."
+        "'all forms' endpoint). Use for: list my popup/embedded forms."
     ),
 )
 async def fn_list_forms(ctx, params: ListFormsParams) -> ActionResult:
@@ -59,7 +59,7 @@ async def fn_list_forms(ctx, params: ListFormsParams) -> ActionResult:
 
 @chat.function(
     "rename_form", action_type="write", event="mailerlite.form.updated", effects=["update:form"],
-    data_model=FormRecord, description="Rename a form. Use for: переименуй форму, rename this form.",
+    data_model=FormRecord, description="Rename a form. Use for: rename this form.",
 )
 async def fn_rename_form(ctx, params: RenameFormParams) -> ActionResult:
     """Rename a form."""
@@ -74,7 +74,7 @@ async def fn_rename_form(ctx, params: RenameFormParams) -> ActionResult:
 
 @chat.function(
     "delete_form", action_type="destructive", event="mailerlite.form.deleted", effects=["delete:form"],
-    data_model=DeletedResponse, description="Permanently delete a form. Use for: удали форму, delete this form.",
+    data_model=DeletedResponse, description="Permanently delete a form. Use for: delete this form.",
 )
 async def fn_delete_form(ctx, params: FormIdParams) -> ActionResult:
     """Permanently delete a form."""
@@ -88,7 +88,7 @@ async def fn_delete_form(ctx, params: FormIdParams) -> ActionResult:
 
 @chat.function(
     "form_subscribers", action_type="read", chain_callable=True, data_model=SubscriberList,
-    description="List subscribers who signed up via a specific form. Use for: кто подписался через форму, subscribers from this form.",
+    description="List subscribers who signed up via a specific form. Use for: subscribers from this form.",
 )
 async def fn_form_subscribers(ctx, params: FormSubscribersParams) -> ActionResult:
     """List subscribers who signed up via a specific form."""
@@ -112,7 +112,7 @@ async def fn_form_subscribers(ctx, params: FormSubscribersParams) -> ActionResul
 
 @chat.function(
     "list_fields", action_type="read", chain_callable=True, data_model=FieldList,
-    description="List custom subscriber fields (text/number/date). Use for: покажи кастомные поля, list custom fields.",
+    description="List custom subscriber fields (text/number/date). Use for: list custom fields.",
 )
 async def fn_list_fields(ctx, params: ListFieldsParams) -> ActionResult:
     """List custom subscriber fields (text/number/date)."""
@@ -132,7 +132,7 @@ async def fn_list_fields(ctx, params: ListFieldsParams) -> ActionResult:
 @chat.function(
     "create_field", action_type="write", event="mailerlite.field.created", effects=["create:field"],
     data_model=FieldRecord,
-    description="Create a custom subscriber field (type: text, number, or date). Use for: создай кастомное поле, add a custom field.",
+    description="Create a custom subscriber field (type: text, number, or date). Use for: add a custom field.",
 )
 async def fn_create_field(ctx, params: CreateFieldParams) -> ActionResult:
     """Create a custom subscriber field (type: text, number, or date)."""
@@ -147,7 +147,7 @@ async def fn_create_field(ctx, params: CreateFieldParams) -> ActionResult:
 
 @chat.function(
     "rename_field", action_type="write", event="mailerlite.field.updated", effects=["update:field"],
-    data_model=FieldRecord, description="Rename a custom field. Use for: переименуй поле, rename this field.",
+    data_model=FieldRecord, description="Rename a custom field. Use for: rename this field.",
 )
 async def fn_rename_field(ctx, params: RenameFieldParams) -> ActionResult:
     """Rename a custom field."""
@@ -162,7 +162,7 @@ async def fn_rename_field(ctx, params: RenameFieldParams) -> ActionResult:
 
 @chat.function(
     "delete_field", action_type="destructive", event="mailerlite.field.deleted", effects=["delete:field"],
-    data_model=DeletedResponse, description="Permanently delete a custom field. Use for: удали поле, delete this field.",
+    data_model=DeletedResponse, description="Permanently delete a custom field. Use for: delete this field.",
 )
 async def fn_delete_field(ctx, params: FieldIdParams) -> ActionResult:
     """Permanently delete a custom field."""

@@ -10,6 +10,7 @@ if _dir not in sys.path:
 
 for _m in list(sys.modules):
     if _m in ("app", "accounts", "ml_api", "capability", "params", "response_models",
+              "cache_models",
               "handlers_accounts", "handlers_subscribers", "handlers_groups_segments",
               "handlers_campaigns", "handlers_automations", "handlers_forms_fields",
               "handlers_webhooks_reference", "handlers_capability",
@@ -18,6 +19,9 @@ for _m in list(sys.modules):
 
 from app import ext, chat  # noqa: E402, F401
 
+# Register cache models BEFORE panels.py, which reads via ctx.cache.get_or_fetch
+# (same load-order rule as mail-client/main.py).
+import cache_models                   # noqa: E402, F401
 import skeleton                       # noqa: E402, F401
 import handlers_accounts              # noqa: E402, F401
 import handlers_subscribers           # noqa: E402, F401

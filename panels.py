@@ -14,9 +14,56 @@ from imperal_sdk import ui
 
 from app import ext
 from accounts import _active_account, _all_accounts, mailerlite_ready
+from cache_models import SidebarStats
 from ml_api import ml_get, MailerLiteError, validate_campaigns_limit
 
 _SIDEBAR_CAMPAIGNS_LIMIT = 8
+_STATS_TTL_SECONDS = 300  # 5 min — quick stats don't need to be live-fresh
+
+
+def _stats_cache_key(label: str) -> str:
+    # ctx.cache keys are capped at 128 chars and restricted to
+    # [A-Za-z0-9_\-:] (I-CACHE-KEY-SAFETY) — account labels are free text
+    # from the user, so hash rather than embed them raw.
+    import hashlib
+    digest = hashlib.sha256(label.encode("utf-8")).hexdigest()[:24]
+    return f"mailerlite-stats-{digest}"
+
+
+async def _fetch_sidebar_stats(ctx, active_key: str, active_label: str) -> SidebarStats:
+    """The actual MailerLite calls — only runs on a cache miss (once per
+    account per _STATS_TTL_SECONDS), not on every sidebar render.
+
+    Subscriber count: GET /subscribers uses CURSOR pagination — confirmed
+    live, its `meta` never carries a `total` field (only
+    next_cursor/prev_cursor), unlike page-based endpoints. The documented
+    GET /subscribers/count also 404s live despite being in MailerLite's own
+    docs outline — not usable. So we pull one page at MailerLite's max page
+    size (1000, confirmed live) and show the exact count when it all fits,
+    or "N+" when a next_cursor says there's more.
+
+    Campaigns: GET /campaigns IS page-based and DOES carry an exact
+    meta.total + meta.aggregations (confirmed live) — used as-is, no
+    approximation needed.
+    """
+    subs = await ml_get(ctx, active_key, "subscribers", params={"limit": 1000})
+    sub_rows = subs.get("data") or []
+    has_more = bool((subs.get("meta") or {}).get("next_cursor"))
+    subscriber_display = f"{len(sub_rows):,}" + ("+" if has_more else "")
+
+    campaigns = await ml_get(ctx, active_key, "campaigns", params={
+        "limit": validate_campaigns_limit(10), "filter[status]": "sent",
+    })
+    camp_meta = campaigns.get("meta") or {}
+    sent_campaigns = camp_meta.get("total", 0)
+    total_campaigns = (camp_meta.get("aggregations") or {}).get("all", sent_campaigns)
+
+    return SidebarStats(
+        account_label=active_label,
+        subscriber_display=subscriber_display,
+        sent_campaigns=sent_campaigns,
+        total_campaigns=total_campaigns,
+    )
 
 
 def _key_form(error: str = "") -> list[ui.UINode]:
@@ -85,25 +132,25 @@ async def sidebar_panel(ctx, show_add: bool = False):
     active_label = (active or {}).get("label", "")
     active_key = (active or {}).get("api_key", "")
 
-    subscriber_total = "0"
-    group_total = None
     campaigns_section: list[ui.UINode] = []
     try:
-        # GET /subscribers uses CURSOR pagination — confirmed live: its `meta`
-        # never carries a `total` field (only next_cursor/prev_cursor), unlike
-        # page-based endpoints like /groups. The documented `GET
-        # /subscribers/count` also 404s live despite being in MailerLite's
-        # docs outline. So `meta.total` was always None here -> always showed
-        # "0" regardless of real subscriber count. Fix: pull one page at the
-        # max page size (1000, confirmed live) and show the exact count when
-        # it all fit on this page, or "N+" when a next_cursor says there's
-        # more — honest either way, and still just one API call.
-        subs = await ml_get(ctx, active_key, "subscribers", params={"limit": 1000})
-        sub_rows = subs.get("data") or []
-        has_more = bool((subs.get("meta") or {}).get("next_cursor"))
-        subscriber_total = f"{len(sub_rows):,}" + ("+" if has_more else "")
-        groups = await ml_get(ctx, active_key, "groups", params={"limit": 1})
-        group_total = (groups.get("meta") or {}).get("total")
+        # Quick-stats (subscriber count, sent/total campaigns) used to hit
+        # the live MailerLite API on EVERY sidebar render. That's both
+        # wasteful and was the root cause of the earlier stale-"0" bug's
+        # sibling complaint: no reason to re-fetch a number that only
+        # changes over minutes/hours. ctx.skeleton is off-limits from panel
+        # context (guarded to @ext.skeleton only), so we use ctx.cache —
+        # the panel-facing equivalent: refreshes once per
+        # _STATS_TTL_SECONDS window instead of on every open.
+        stats = await ctx.cache.get_or_fetch(
+            _stats_cache_key(active_label), SidebarStats,
+            lambda: _fetch_sidebar_stats(ctx, active_key, active_label),
+            ttl_seconds=_STATS_TTL_SECONDS,
+        )
+        subscriber_total = stats.subscriber_display
+        sent_campaigns = stats.sent_campaigns
+        total_campaigns = stats.total_campaigns
+
         campaigns = await ml_get(ctx, active_key, "campaigns", params={
             "limit": validate_campaigns_limit(_SIDEBAR_CAMPAIGNS_LIMIT),
             "filter[status]": "sent",
@@ -158,7 +205,7 @@ async def sidebar_panel(ctx, show_add: bool = False):
         ui.Divider(),
         ui.Stats(children=[
             ui.Stat(label="Subscribers", value=subscriber_total, icon="Users"),
-            ui.Stat(label="Groups", value=str(group_total or 0), icon="Folder"),
+            ui.Stat(label="Campaigns sent", value=f"{sent_campaigns}/{total_campaigns}", icon="Send"),
         ]),
         *campaigns_section,
         ui.Text(content=f"{active_label} — connected", variant="caption"),

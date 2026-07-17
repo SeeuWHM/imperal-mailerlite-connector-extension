@@ -82,3 +82,32 @@ async def health(ctx) -> dict:
     """Report whether the user has at least one MailerLite account connected."""
     from accounts import mailerlite_ready
     return {"status": "ok", "version": ext.version, "mailerlite_connected": await mailerlite_ready(ctx)}
+
+
+# ── User-scope secret: every connected MailerLite API key ────────────────────
+# A real per-user credential, interpreted literally as the key value: no URL
+# or account identifier is ever assembled or guessed from it. JSON list of
+# {label, api_key, is_active} — same multi-account shape as the Bing
+# Webmaster connector's `bing_accounts` / SE Ranking's `seranking_accounts`.
+# write_mode="extension": only this extension's own connect/switch/disconnect
+# handlers write it, never the platform's generic Secrets panel, since its
+# shape is a JSON blob, not one opaque value.
+#
+# THIS DECLARATION WAS MISSING (the bug that made the left sidebar panel
+# vanish almost instantly): without it, the secret this whole extension reads
+# on every panel render (accounts.py's ACCOUNTS_SECRET) was never registered
+# in the manifest, so the platform had no declared secret to back the panel's
+# ctx.secrets reads/writes against.
+ext.secret(
+    name="mailerlite_accounts",
+    description=(
+        "Every MailerLite account you've connected (JSON list of "
+        "{label, api_key, is_active}) — lets you track multiple MailerLite "
+        "accounts and switch between them. Managed only through this "
+        "extension's own connect/switch/disconnect actions."
+    ),
+    required=False,
+    write_mode="extension",
+    scope="user",
+    max_bytes=8192,
+)(lambda: None)

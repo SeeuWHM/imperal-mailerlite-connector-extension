@@ -3839,7 +3839,26 @@
       "interval_sec": 60
     }
   },
+  "secrets": [
+    {
+      "name": "mailerlite_accounts",
+      "description": "Every MailerLite account you've connected (JSON list of {label, api_key, is_active}) — lets you track multiple MailerLite accounts and switch between them. Managed only through this extension's own connect/switch/disconnect actions.",
+      "required": false,
+      "write_mode": "extension",
+      "max_bytes": 8192,
+      "scope": "user"
+    }
+  ],
   "panels": [
+    {
+      "panel_id": "secrets",
+      "slot": "right",
+      "title": "Secrets",
+      "tree": {},
+      "icon": "KeyRound",
+      "refresh": "manual",
+      "center_overlay": false
+    },
     {
       "panel_id": "mailerlite_sidebar",
       "slot": "left",

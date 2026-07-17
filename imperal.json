@@ -1,6 +1,6 @@
 {
   "manifest_schema_version": 3,
-  "sdk_version": "5.9.6",
+  "sdk_version": "5.9.9",
   "app_id": "mailerlite-connector",
   "version": "0.1.0",
   "name": "MailerLite",

@@ -1,0 +1,3854 @@
+{
+  "manifest_schema_version": 3,
+  "sdk_version": "5.9.6",
+  "app_id": "mailerlite-connector",
+  "version": "0.1.0",
+  "name": "MailerLite",
+  "description": "MailerLite email marketing — manage subscribers, groups, segments, campaigns, automations, forms, custom fields, and webhooks. Connect your own MailerLite API key to read and manage your own account's data here. Some features are plan-gated by MailerLite itself (e.g. resend/multivariate campaigns, advanced automation triggers) — this extension detects and reports that honestly rather than guessing.",
+  "icon": "icon.svg",
+  "actions_explicit": true,
+  "system": false,
+  "capabilities": [
+    "Subscribers",
+    "Groups",
+    "Segments",
+    "Campaigns",
+    "Automations",
+    "Forms",
+    "Custom Fields",
+    "Webhooks",
+    "Plan-aware feature gating"
+  ],
+  "tools": [
+    {
+      "name": "skeleton_refresh_mailerlite_config",
+      "description": "MailerLite connection status — whether the user has connected an API key",
+      "scopes": [],
+      "parameters": {}
+    },
+    {
+      "name": "skeleton_refresh_mailerlite_groups",
+      "description": "The user's MailerLite groups — name and subscriber counts (up to 5 shown)",
+      "scopes": [],
+      "parameters": {}
+    },
+    {
+      "name": "connection_status",
+      "description": "Whether the user's own MailerLite API key is connected. Use for: подключен ли MailerLite, is my MailerLite account connected, connection status.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "connected": {
+            "default": false,
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "masked_key": {
+            "default": "",
+            "title": "Masked Key",
+            "type": "string"
+          }
+        },
+        "title": "ConnectionStatus",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "save_mailerlite_key",
+      "description": "Connect a MailerLite account by saving its API key. Validates the key against MailerLite before saving. Use for: подключи MailerLite, connect my MailerLite account, save this API key.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:secret"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "mailerlite_api_key": {
+            "description": "Your MailerLite API key, from MailerLite -> Integrations -> MailerLite API -> Generate new token",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Mailerlite Api Key",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "description": "Optional display name for this account",
+            "maxLength": 60,
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mailerlite_api_key"
+        ],
+        "title": "SaveKeyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "masked_key": {
+            "default": "",
+            "title": "Masked Key",
+            "type": "string"
+          },
+          "is_active": {
+            "default": false,
+            "title": "Is Active",
+            "type": "boolean"
+          }
+        },
+        "title": "AccountRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.account.connected",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_mailerlite_accounts",
+      "description": "List every MailerLite account you've connected — label, masked key, which one is active.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "AccountRecord": {
+            "properties": {
+              "label": {
+                "default": "",
+                "title": "Label",
+                "type": "string"
+              },
+              "masked_key": {
+                "default": "",
+                "title": "Masked Key",
+                "type": "string"
+              },
+              "is_active": {
+                "default": false,
+                "title": "Is Active",
+                "type": "boolean"
+              }
+            },
+            "title": "AccountRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/$defs/AccountRecord"
+            },
+            "title": "Accounts",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "AccountsList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "switch_mailerlite_account",
+      "description": "Switch which connected MailerLite account is active — all following calls use this one.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:secret"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "label": {
+            "description": "Account label (from list_mailerlite_accounts)",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "AccountLabelParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "active": {
+            "default": "",
+            "title": "Active",
+            "type": "string"
+          }
+        },
+        "title": "AccountSwitched",
+        "type": "object"
+      },
+      "event": "mailerlite.account.switched",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "disconnect_mailerlite_account",
+      "description": "Disconnect ONE specific connected MailerLite account by its label — removes only that key.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:secret"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "label": {
+            "description": "Account label (from list_mailerlite_accounts)",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "AccountLabelParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "remaining": {
+            "default": 0,
+            "title": "Remaining",
+            "type": "integer"
+          }
+        },
+        "title": "AccountDisconnected",
+        "type": "object"
+      },
+      "event": "mailerlite.account.disconnected",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_subscribers",
+      "description": "List subscribers, optionally filtered by status (active/unsubscribed/unconfirmed/bounced/junk). Use for: покажи подписчиков, list my subscribers, show active subscribers.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Filter: active, unsubscribed, unconfirmed, bounced, junk",
+            "title": "Status"
+          },
+          "limit": {
+            "default": 25,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "default": "",
+            "description": "Pagination cursor from a previous page's response",
+            "title": "Cursor",
+            "type": "string"
+          }
+        },
+        "title": "ListSubscribersParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SubscriberRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "email": {
+                "default": "",
+                "title": "Email",
+                "type": "string"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "source": {
+                "default": "",
+                "title": "Source",
+                "type": "string"
+              },
+              "sent": {
+                "default": 0,
+                "title": "Sent",
+                "type": "integer"
+              },
+              "opens_count": {
+                "default": 0,
+                "title": "Opens Count",
+                "type": "integer"
+              },
+              "clicks_count": {
+                "default": 0,
+                "title": "Clicks Count",
+                "type": "integer"
+              },
+              "open_rate": {
+                "default": 0.0,
+                "title": "Open Rate",
+                "type": "number"
+              },
+              "click_rate": {
+                "default": 0.0,
+                "title": "Click Rate",
+                "type": "number"
+              },
+              "subscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subscribed At"
+              },
+              "unsubscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unsubscribed At"
+              },
+              "fields": {
+                "additionalProperties": true,
+                "title": "Fields",
+                "type": "object"
+              },
+              "groups": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Groups",
+                "type": "array"
+              }
+            },
+            "title": "SubscriberRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "subscribers": {
+            "items": {
+              "$ref": "#/$defs/SubscriberRecord"
+            },
+            "title": "Subscribers",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Next Cursor"
+          }
+        },
+        "title": "SubscriberList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "create_fill_subscriber",
+      "description": "Create or update (upsert) a subscriber by email. Non-destructive — omitted fields/groups are NOT removed from an existing subscriber. Use for: добавь подписчика, add this email to my list.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:subscriber"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "email": {
+            "description": "Subscriber's email address",
+            "title": "Email",
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "description": "Custom field values, e.g. {'name': 'Jane'}. Never removes omitted fields.",
+            "title": "Fields",
+            "type": "object"
+          },
+          "groups": {
+            "description": "Group ids to add this subscriber to. Never removes omitted groups.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "active, unsubscribed, unconfirmed, bounced, or junk",
+            "title": "Status"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "UpsertSubscriberParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "email": {
+            "default": "",
+            "title": "Email",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "source": {
+            "default": "",
+            "title": "Source",
+            "type": "string"
+          },
+          "sent": {
+            "default": 0,
+            "title": "Sent",
+            "type": "integer"
+          },
+          "opens_count": {
+            "default": 0,
+            "title": "Opens Count",
+            "type": "integer"
+          },
+          "clicks_count": {
+            "default": 0,
+            "title": "Clicks Count",
+            "type": "integer"
+          },
+          "open_rate": {
+            "default": 0.0,
+            "title": "Open Rate",
+            "type": "number"
+          },
+          "click_rate": {
+            "default": 0.0,
+            "title": "Click Rate",
+            "type": "number"
+          },
+          "subscribed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subscribed At"
+          },
+          "unsubscribed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Unsubscribed At"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "title": "Fields",
+            "type": "object"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          }
+        },
+        "title": "SubscriberRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.subscriber.upserted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "get_subscriber",
+      "description": "Fetch one subscriber by id. Use for: покажи подписчика, get subscriber details.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subscriber_id": {
+            "description": "MailerLite subscriber id (from list_subscribers)",
+            "title": "Subscriber Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriber_id"
+        ],
+        "title": "SubscriberIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "email": {
+            "default": "",
+            "title": "Email",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "source": {
+            "default": "",
+            "title": "Source",
+            "type": "string"
+          },
+          "sent": {
+            "default": 0,
+            "title": "Sent",
+            "type": "integer"
+          },
+          "opens_count": {
+            "default": 0,
+            "title": "Opens Count",
+            "type": "integer"
+          },
+          "clicks_count": {
+            "default": 0,
+            "title": "Clicks Count",
+            "type": "integer"
+          },
+          "open_rate": {
+            "default": 0.0,
+            "title": "Open Rate",
+            "type": "number"
+          },
+          "click_rate": {
+            "default": 0.0,
+            "title": "Click Rate",
+            "type": "number"
+          },
+          "subscribed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subscribed At"
+          },
+          "unsubscribed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Unsubscribed At"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "title": "Fields",
+            "type": "object"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          }
+        },
+        "title": "SubscriberRecord",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "subscriber_activity",
+      "description": "A subscriber's engagement activity (opens, clicks, etc). Use for: активность подписчика, subscriber engagement history.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subscriber_id": {
+            "description": "MailerLite subscriber id (from list_subscribers)",
+            "title": "Subscriber Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriber_id"
+        ],
+        "title": "SubscriberIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SubscriberActivityRow": {
+            "properties": {
+              "activity_type": {
+                "default": "",
+                "title": "Activity Type",
+                "type": "string"
+              },
+              "date": {
+                "default": "",
+                "title": "Date",
+                "type": "string"
+              },
+              "detail": {
+                "additionalProperties": true,
+                "title": "Detail",
+                "type": "object"
+              }
+            },
+            "title": "SubscriberActivityRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "subscriber_id": {
+            "default": "",
+            "title": "Subscriber Id",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/$defs/SubscriberActivityRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "has_no_activity_yet": {
+            "default": false,
+            "title": "Has No Activity Yet",
+            "type": "boolean"
+          }
+        },
+        "title": "SubscriberActivityList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "add_subscriber_to_group",
+      "description": "Assign an existing subscriber to a group. Use for: добавь подписчика в группу.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:subscriber"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subscriber_id": {
+            "description": "MailerLite subscriber id",
+            "title": "Subscriber Id",
+            "type": "string"
+          },
+          "group_id": {
+            "description": "MailerLite group id",
+            "title": "Group Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriber_id",
+          "group_id"
+        ],
+        "title": "GroupSubscriberParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.subscriber.grouped",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "remove_subscriber_from_group",
+      "description": "Remove a subscriber from a group. Use for: убери подписчика из группы.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:subscriber"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subscriber_id": {
+            "description": "MailerLite subscriber id",
+            "title": "Subscriber Id",
+            "type": "string"
+          },
+          "group_id": {
+            "description": "MailerLite group id",
+            "title": "Group Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriber_id",
+          "group_id"
+        ],
+        "title": "GroupSubscriberParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.subscriber.ungrouped",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_subscriber",
+      "description": "Permanently delete a subscriber. Use for: удали подписчика.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:subscriber"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subscriber_id": {
+            "description": "MailerLite subscriber id (from list_subscribers)",
+            "title": "Subscriber Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriber_id"
+        ],
+        "title": "SubscriberIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.subscriber.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "forget_subscriber",
+      "description": "GDPR 'right to be forgotten': permanently erases this subscriber's personal data (distinct from delete_subscriber, which just removes the record — forget is MailerLite's own compliance endpoint, POST /subscribers/{id}/forget, confirmed via MailerLite's official SDK source). Use for: удали данные подписчика по gdpr, forget this subscriber, right to be forgotten.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:subscriber"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subscriber_id": {
+            "description": "MailerLite subscriber id (from list_subscribers)",
+            "title": "Subscriber Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriber_id"
+        ],
+        "title": "SubscriberIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.subscriber.forgotten",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_groups",
+      "description": "List mailing groups. Use for: покажи группы, list my groups.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "limit": {
+            "default": 25,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "name_contains": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Partial-match filter on group name",
+            "title": "Name Contains"
+          }
+        },
+        "title": "ListGroupsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "GroupRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "active_count": {
+                "default": 0,
+                "title": "Active Count",
+                "type": "integer"
+              },
+              "sent_count": {
+                "default": 0,
+                "title": "Sent Count",
+                "type": "integer"
+              },
+              "open_rate": {
+                "default": 0.0,
+                "title": "Open Rate",
+                "type": "number"
+              },
+              "click_rate": {
+                "default": 0.0,
+                "title": "Click Rate",
+                "type": "number"
+              },
+              "unsubscribed_count": {
+                "default": 0,
+                "title": "Unsubscribed Count",
+                "type": "integer"
+              },
+              "created_at": {
+                "default": "",
+                "title": "Created At",
+                "type": "string"
+              }
+            },
+            "title": "GroupRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/$defs/GroupRecord"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "GroupList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "create_group",
+      "description": "Create a new mailing group. Use for: создай группу, new group called X.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:group"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CreateGroupParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "active_count": {
+            "default": 0,
+            "title": "Active Count",
+            "type": "integer"
+          },
+          "sent_count": {
+            "default": 0,
+            "title": "Sent Count",
+            "type": "integer"
+          },
+          "open_rate": {
+            "default": 0.0,
+            "title": "Open Rate",
+            "type": "number"
+          },
+          "click_rate": {
+            "default": 0.0,
+            "title": "Click Rate",
+            "type": "number"
+          },
+          "unsubscribed_count": {
+            "default": 0,
+            "title": "Unsubscribed Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "title": "GroupRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.group.created",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "rename_group",
+      "description": "Rename a group. Use for: переименуй группу.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:group"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id",
+          "name"
+        ],
+        "title": "RenameGroupParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "active_count": {
+            "default": 0,
+            "title": "Active Count",
+            "type": "integer"
+          },
+          "sent_count": {
+            "default": 0,
+            "title": "Sent Count",
+            "type": "integer"
+          },
+          "open_rate": {
+            "default": 0.0,
+            "title": "Open Rate",
+            "type": "number"
+          },
+          "click_rate": {
+            "default": 0.0,
+            "title": "Click Rate",
+            "type": "number"
+          },
+          "unsubscribed_count": {
+            "default": 0,
+            "title": "Unsubscribed Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "title": "GroupRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.group.updated",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_group",
+      "description": "Permanently delete a group (subscribers stay, just un-grouped). Use for: удали группу.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:group"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "group_id": {
+            "description": "MailerLite group id (from list_groups)",
+            "title": "Group Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id"
+        ],
+        "title": "GroupIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.group.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "group_subscribers",
+      "description": "List subscribers belonging to a group. Use for: покажи подписчиков группы.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "active, unsubscribed, unconfirmed, bounced, junk",
+            "title": "Status"
+          },
+          "limit": {
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "default": "",
+            "title": "Cursor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id"
+        ],
+        "title": "GroupSubscribersParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SubscriberRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "email": {
+                "default": "",
+                "title": "Email",
+                "type": "string"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "source": {
+                "default": "",
+                "title": "Source",
+                "type": "string"
+              },
+              "sent": {
+                "default": 0,
+                "title": "Sent",
+                "type": "integer"
+              },
+              "opens_count": {
+                "default": 0,
+                "title": "Opens Count",
+                "type": "integer"
+              },
+              "clicks_count": {
+                "default": 0,
+                "title": "Clicks Count",
+                "type": "integer"
+              },
+              "open_rate": {
+                "default": 0.0,
+                "title": "Open Rate",
+                "type": "number"
+              },
+              "click_rate": {
+                "default": 0.0,
+                "title": "Click Rate",
+                "type": "number"
+              },
+              "subscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subscribed At"
+              },
+              "unsubscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unsubscribed At"
+              },
+              "fields": {
+                "additionalProperties": true,
+                "title": "Fields",
+                "type": "object"
+              },
+              "groups": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Groups",
+                "type": "array"
+              }
+            },
+            "title": "SubscriberRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "subscribers": {
+            "items": {
+              "$ref": "#/$defs/SubscriberRecord"
+            },
+            "title": "Subscribers",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Next Cursor"
+          }
+        },
+        "title": "SubscriberList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_segments",
+      "description": "List dynamic subscriber segments. NOTE: segment filter rules are built in the MailerLite UI only — this extension can list/rename/delete existing segments but not author new filter logic. Use for: покажи сегменты, list my segments.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "limit": {
+            "default": 25,
+            "maximum": 250,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "title": "ListSegmentsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SegmentRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "total": {
+                "default": 0,
+                "title": "Total",
+                "type": "integer"
+              },
+              "open_rate": {
+                "default": 0.0,
+                "title": "Open Rate",
+                "type": "number"
+              },
+              "click_rate": {
+                "default": 0.0,
+                "title": "Click Rate",
+                "type": "number"
+              },
+              "created_at": {
+                "default": "",
+                "title": "Created At",
+                "type": "string"
+              },
+              "automations_using_segment_count": {
+                "default": 0,
+                "title": "Automations Using Segment Count",
+                "type": "integer"
+              }
+            },
+            "title": "SegmentRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "segments": {
+            "items": {
+              "$ref": "#/$defs/SegmentRecord"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "SegmentList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "rename_segment",
+      "description": "Rename a segment (filter rules themselves can't be edited via API). Use for: переименуй сегмент.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:segment"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "segment_id": {
+            "title": "Segment Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "segment_id",
+          "name"
+        ],
+        "title": "RenameSegmentParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          },
+          "open_rate": {
+            "default": 0.0,
+            "title": "Open Rate",
+            "type": "number"
+          },
+          "click_rate": {
+            "default": 0.0,
+            "title": "Click Rate",
+            "type": "number"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "automations_using_segment_count": {
+            "default": 0,
+            "title": "Automations Using Segment Count",
+            "type": "integer"
+          }
+        },
+        "title": "SegmentRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.segment.updated",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_segment",
+      "description": "Permanently delete a segment. Use for: удали сегмент.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:segment"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "segment_id": {
+            "description": "MailerLite segment id (from list_segments)",
+            "title": "Segment Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "segment_id"
+        ],
+        "title": "SegmentIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.segment.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "segment_subscribers",
+      "description": "List subscribers matching a segment's rules. Use for: покажи подписчиков сегмента.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "segment_id": {
+            "title": "Segment Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "limit": {
+            "default": 25,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "default": "",
+            "title": "Cursor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "segment_id"
+        ],
+        "title": "SegmentSubscribersParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SubscriberRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "email": {
+                "default": "",
+                "title": "Email",
+                "type": "string"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "source": {
+                "default": "",
+                "title": "Source",
+                "type": "string"
+              },
+              "sent": {
+                "default": 0,
+                "title": "Sent",
+                "type": "integer"
+              },
+              "opens_count": {
+                "default": 0,
+                "title": "Opens Count",
+                "type": "integer"
+              },
+              "clicks_count": {
+                "default": 0,
+                "title": "Clicks Count",
+                "type": "integer"
+              },
+              "open_rate": {
+                "default": 0.0,
+                "title": "Open Rate",
+                "type": "number"
+              },
+              "click_rate": {
+                "default": 0.0,
+                "title": "Click Rate",
+                "type": "number"
+              },
+              "subscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subscribed At"
+              },
+              "unsubscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unsubscribed At"
+              },
+              "fields": {
+                "additionalProperties": true,
+                "title": "Fields",
+                "type": "object"
+              },
+              "groups": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Groups",
+                "type": "array"
+              }
+            },
+            "title": "SubscriberRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "subscribers": {
+            "items": {
+              "$ref": "#/$defs/SubscriberRecord"
+            },
+            "title": "Subscribers",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Next Cursor"
+          }
+        },
+        "title": "SubscriberList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_campaigns",
+      "description": "List campaigns filtered by status (sent/draft/ready) and/or type (regular/ab/resend/rss). Use for: покажи мои кампании, list my campaigns, show draft/sent campaigns.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "sent, draft, or ready (defaults to ready)",
+            "title": "Status"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "regular, ab, resend, or rss",
+            "title": "Type"
+          },
+          "limit": {
+            "default": 25,
+            "description": "Must be one of 1, 10, 25, 50, or 100 (confirmed live) — any other value is rejected",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "title": "ListCampaignsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "CampaignRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "type": {
+                "default": "",
+                "title": "Type",
+                "type": "string"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "subject": {
+                "default": "",
+                "title": "Subject",
+                "type": "string"
+              },
+              "missing_data": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Missing Data",
+                "type": "array"
+              },
+              "created_at": {
+                "default": "",
+                "title": "Created At",
+                "type": "string"
+              },
+              "scheduled_for": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Scheduled For"
+              }
+            },
+            "title": "CampaignRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "campaigns": {
+            "items": {
+              "$ref": "#/$defs/CampaignRecord"
+            },
+            "title": "Campaigns",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "CampaignList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "get_campaign",
+      "description": "Fetch one campaign by id. Use for: покажи кампанию, get this campaign.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "campaign_id": {
+            "description": "MailerLite campaign id (from list_campaigns)",
+            "title": "Campaign Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "campaign_id"
+        ],
+        "title": "CampaignIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "default": "",
+            "title": "Subject",
+            "type": "string"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Data",
+            "type": "array"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scheduled For"
+          }
+        },
+        "title": "CampaignRecord",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "create_campaign",
+      "description": "Create a draft campaign. type='resend'/'multivariate' and content_html both carry a REAL risk of being rejected on lower MailerLite plans — any such rejection is surfaced with MailerLite's own exact wording, never guessed. Use for: создай кампанию, draft a new campaign called X.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:campaign"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "regular",
+            "description": "regular, ab, resend, or multivariate. 'resend' and 'multivariate' are documented by MailerLite as available only on growing/advanced-tier plans — expect a possible plan-restricted rejection on lower plans, surfaced verbatim from MailerLite's own error.",
+            "title": "Type",
+            "type": "string"
+          },
+          "subject": {
+            "default": "",
+            "maxLength": 255,
+            "title": "Subject",
+            "type": "string"
+          },
+          "from_name": {
+            "default": "",
+            "maxLength": 255,
+            "title": "From Name",
+            "type": "string"
+          },
+          "from_email": {
+            "default": "",
+            "description": "Must be an email address already verified in MailerLite",
+            "title": "From Email",
+            "type": "string"
+          },
+          "reply_to": {
+            "default": "",
+            "description": "Must be an email address already verified in MailerLite",
+            "title": "Reply To",
+            "type": "string"
+          },
+          "content_html": {
+            "default": "",
+            "description": "Raw HTML email body. Observed live: MailerLite can reject this with \"Content submission is only available on Premium plan.\" on non-Premium accounts — surfaced verbatim, never silently swallowed.",
+            "maxLength": 500000,
+            "title": "Content Html",
+            "type": "string"
+          },
+          "language_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "From list_campaign_languages; defaults to English",
+            "title": "Language Id"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CreateCampaignParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "default": "",
+            "title": "Subject",
+            "type": "string"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Data",
+            "type": "array"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scheduled For"
+          }
+        },
+        "title": "CampaignRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.campaign.created",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "schedule_campaign",
+      "description": "Schedule a ready campaign to send (or send it instantly with delivery='instant'). Use for: отправь кампанию, schedule this campaign for tomorrow, send now.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:campaign"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "campaign_id": {
+            "title": "Campaign Id",
+            "type": "string"
+          },
+          "delivery": {
+            "default": "instant",
+            "description": "instant or scheduled",
+            "title": "Delivery",
+            "type": "string"
+          },
+          "schedule_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "unix_timestamp or timezone-relative — see MailerLite docs",
+            "title": "Schedule Type"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Y-m-d, required if delivery=scheduled",
+            "title": "Date"
+          },
+          "hours": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Hours"
+          },
+          "minutes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minutes"
+          },
+          "timezone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "From list_timezones",
+            "title": "Timezone Id"
+          }
+        },
+        "required": [
+          "campaign_id"
+        ],
+        "title": "ScheduleCampaignParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "default": "",
+            "title": "Subject",
+            "type": "string"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Data",
+            "type": "array"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scheduled For"
+          }
+        },
+        "title": "CampaignRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.campaign.scheduled",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "cancel_campaign",
+      "description": "Cancel a campaign that's currently in 'ready' state (queued to send). Use for: отмени кампанию, cancel this send.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:campaign"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "campaign_id": {
+            "description": "MailerLite campaign id (from list_campaigns)",
+            "title": "Campaign Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "campaign_id"
+        ],
+        "title": "CampaignIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "default": "",
+            "title": "Subject",
+            "type": "string"
+          },
+          "missing_data": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Data",
+            "type": "array"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scheduled For"
+          }
+        },
+        "title": "CampaignRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.campaign.canceled",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_campaign",
+      "description": "Permanently delete a campaign. Use for: удали кампанию, delete this campaign.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:campaign"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "campaign_id": {
+            "description": "MailerLite campaign id (from list_campaigns)",
+            "title": "Campaign Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "campaign_id"
+        ],
+        "title": "CampaignIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.campaign.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_automations",
+      "description": "List automations (name, enabled/disabled, created date) — read-only. MailerLite's API can't build or edit automation steps; those are UI-only. Use for: покажи мои автоматизации, list my automations, show automation workflows.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Enabled"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "limit": {
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "title": "ListAutomationsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "AutomationRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "enabled": {
+                "default": false,
+                "title": "Enabled",
+                "type": "boolean"
+              },
+              "created_at": {
+                "default": "",
+                "title": "Created At",
+                "type": "string"
+              }
+            },
+            "title": "AutomationRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "automations": {
+            "items": {
+              "$ref": "#/$defs/AutomationRecord"
+            },
+            "title": "Automations",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "AutomationList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "get_automation",
+      "description": "Fetch one automation's basic info by id. Use for: покажи автоматизацию, get this automation.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "automation_id": {
+            "description": "MailerLite automation id (from list_automations)",
+            "title": "Automation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "automation_id"
+        ],
+        "title": "AutomationIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "title": "AutomationRecord",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "automation_activity",
+      "description": "Subscriber activity flowing through an automation, filtered by status (completed/active/canceled/failed — required). Use for: покажи активность автоматизации, who's in this automation, automation subscriber activity.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "automation_id": {
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "status": {
+            "description": "completed, active, canceled, or failed (required by MailerLite)",
+            "title": "Status",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "automation_id",
+          "status"
+        ],
+        "title": "AutomationActivityParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "AutomationActivityRow": {
+            "properties": {
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "date": {
+                "default": "",
+                "title": "Date",
+                "type": "string"
+              },
+              "reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reason"
+              }
+            },
+            "title": "AutomationActivityRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "automation_id": {
+            "default": "",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/$defs/AutomationActivityRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "AutomationActivityList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "create_automation_draft",
+      "description": "Create an EMPTY draft automation (name only) — MailerLite's API can't define triggers/steps, so the user still needs to open MailerLite's UI to actually build the workflow. Use for: создай черновик автоматизации, create a draft automation shell.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:automation"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "name": {
+            "description": "Draft name only — MailerLite's API cannot define an automation's trigger/steps; those must still be built in the MailerLite UI after this draft is created.",
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CreateAutomationDraftParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "title": "AutomationRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.automation.created",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_automation",
+      "description": "Permanently delete an automation. Use for: удали автоматизацию, delete this automation.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:automation"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "automation_id": {
+            "description": "MailerLite automation id (from list_automations)",
+            "title": "Automation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "automation_id"
+        ],
+        "title": "AutomationIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.automation.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_forms",
+      "description": "List forms of one type: popup, embedded, or promotion (required — MailerLite has no combined 'all forms' endpoint). Use for: покажи мои формы, list my popup/embedded forms.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "form_type": {
+            "description": "popup, embedded, or promotion (required — path segment, not a filter)",
+            "title": "Form Type",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Partial-match filter on form name",
+            "title": "Name"
+          },
+          "limit": {
+            "default": 25,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "form_type"
+        ],
+        "title": "ListFormsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "FormRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "conversions_count": {
+                "default": 0,
+                "title": "Conversions Count",
+                "type": "integer"
+              },
+              "visitors": {
+                "default": 0,
+                "title": "Visitors",
+                "type": "integer"
+              },
+              "created_at": {
+                "default": "",
+                "title": "Created At",
+                "type": "string"
+              }
+            },
+            "title": "FormRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "forms": {
+            "items": {
+              "$ref": "#/$defs/FormRecord"
+            },
+            "title": "Forms",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "form_type": {
+            "default": "",
+            "title": "Form Type",
+            "type": "string"
+          }
+        },
+        "title": "FormList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "rename_form",
+      "description": "Rename a form. Use for: переименуй форму, rename this form.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:form"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "form_id": {
+            "title": "Form Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "form_id",
+          "name"
+        ],
+        "title": "RenameFormParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "conversions_count": {
+            "default": 0,
+            "title": "Conversions Count",
+            "type": "integer"
+          },
+          "visitors": {
+            "default": 0,
+            "title": "Visitors",
+            "type": "integer"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "title": "FormRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.form.updated",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_form",
+      "description": "Permanently delete a form. Use for: удали форму, delete this form.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:form"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "form_id": {
+            "description": "MailerLite form id (from list_forms)",
+            "title": "Form Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "form_id"
+        ],
+        "title": "FormIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.form.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "form_subscribers",
+      "description": "List subscribers who signed up via a specific form. Use for: кто подписался через форму, subscribers from this form.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "form_id": {
+            "title": "Form Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "limit": {
+            "default": 25,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "default": "",
+            "title": "Cursor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "form_id"
+        ],
+        "title": "FormSubscribersParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SubscriberRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "email": {
+                "default": "",
+                "title": "Email",
+                "type": "string"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "source": {
+                "default": "",
+                "title": "Source",
+                "type": "string"
+              },
+              "sent": {
+                "default": 0,
+                "title": "Sent",
+                "type": "integer"
+              },
+              "opens_count": {
+                "default": 0,
+                "title": "Opens Count",
+                "type": "integer"
+              },
+              "clicks_count": {
+                "default": 0,
+                "title": "Clicks Count",
+                "type": "integer"
+              },
+              "open_rate": {
+                "default": 0.0,
+                "title": "Open Rate",
+                "type": "number"
+              },
+              "click_rate": {
+                "default": 0.0,
+                "title": "Click Rate",
+                "type": "number"
+              },
+              "subscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subscribed At"
+              },
+              "unsubscribed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unsubscribed At"
+              },
+              "fields": {
+                "additionalProperties": true,
+                "title": "Fields",
+                "type": "object"
+              },
+              "groups": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Groups",
+                "type": "array"
+              }
+            },
+            "title": "SubscriberRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "subscribers": {
+            "items": {
+              "$ref": "#/$defs/SubscriberRecord"
+            },
+            "title": "Subscribers",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Next Cursor"
+          }
+        },
+        "title": "SubscriberList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_fields",
+      "description": "List custom subscriber fields (text/number/date). Use for: покажи кастомные поля, list custom fields.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "field_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "text, number, or date",
+            "title": "Field Type"
+          },
+          "limit": {
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "title": "ListFieldsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "FieldRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "type": {
+                "default": "",
+                "title": "Type",
+                "type": "string"
+              }
+            },
+            "title": "FieldRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/$defs/FieldRecord"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "FieldList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "create_field",
+      "description": "Create a custom subscriber field (type: text, number, or date). Use for: создай кастомное поле, add a custom field.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:field"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "field_type": {
+            "description": "text, number, or date",
+            "title": "Field Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "field_type"
+        ],
+        "title": "CreateFieldParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "FieldRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.field.created",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "rename_field",
+      "description": "Rename a custom field. Use for: переименуй поле, rename this field.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:field"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "field_id": {
+            "title": "Field Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field_id",
+          "name"
+        ],
+        "title": "RenameFieldParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "FieldRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.field.updated",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_field",
+      "description": "Permanently delete a custom field. Use for: удали поле, delete this field.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:field"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "field_id": {
+            "description": "MailerLite field id (from list_fields)",
+            "title": "Field Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field_id"
+        ],
+        "title": "FieldIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.field.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_webhooks",
+      "description": "List configured webhooks. Use for: покажи вебхуки, list my webhooks.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "WebhookRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "event": {
+                "default": "",
+                "title": "Event",
+                "type": "string"
+              },
+              "url": {
+                "default": "",
+                "title": "Url",
+                "type": "string"
+              },
+              "enabled": {
+                "default": true,
+                "title": "Enabled",
+                "type": "boolean"
+              }
+            },
+            "title": "WebhookRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "webhooks": {
+            "items": {
+              "$ref": "#/$defs/WebhookRecord"
+            },
+            "title": "Webhooks",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "WebhookList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "create_webhook",
+      "description": "Create a webhook for a MailerLite event (e.g. subscriber.created, campaign.sent — see MailerLite docs for the full event list). campaign.click/campaign.open/subscriber.deleted REQUIRE batchable=true (MailerLite's own requirement). Use for: создай вебхук, add a webhook for this event.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:webhook"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "events": {
+            "description": "One or more MailerLite webhook event names, e.g. subscriber.created, campaign.sent. campaign.click, campaign.open, and subscriber.deleted REQUIRE batchable=true (MailerLite's own rule).",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Events",
+            "type": "array"
+          },
+          "url": {
+            "description": "Your endpoint URL that will receive the webhook POST",
+            "title": "Url",
+            "type": "string"
+          },
+          "batchable": {
+            "default": false,
+            "title": "Batchable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "events",
+          "url"
+        ],
+        "title": "CreateWebhookParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "event": {
+            "default": "",
+            "title": "Event",
+            "type": "string"
+          },
+          "url": {
+            "default": "",
+            "title": "Url",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "title": "WebhookRecord",
+        "type": "object"
+      },
+      "event": "mailerlite.webhook.created",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "delete_webhook",
+      "description": "Permanently delete a webhook. Use for: удали вебхук, delete this webhook.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:webhook"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "webhook_id": {
+            "description": "MailerLite webhook id (from list_webhooks)",
+            "title": "Webhook Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "webhook_id"
+        ],
+        "title": "WebhookIdParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "deleted": {
+            "default": true,
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "title": "DeletedResponse",
+        "type": "object"
+      },
+      "event": "mailerlite.webhook.deleted",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_campaign_languages",
+      "description": "List valid language_id values for campaign unsubscribe-page language. Use for: какие языки доступны для кампании.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "LanguageRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "shortcode": {
+                "default": "",
+                "title": "Shortcode",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              }
+            },
+            "title": "LanguageRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "languages": {
+            "items": {
+              "$ref": "#/$defs/LanguageRecord"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "LanguageList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "list_timezones",
+      "description": "List valid timezone_id values for scheduling campaigns. Use for: какие таймзоны доступны.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "TimezoneRecord": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              }
+            },
+            "title": "TimezoneRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "timezones": {
+            "items": {
+              "$ref": "#/$defs/TimezoneRecord"
+            },
+            "title": "Timezones",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "TimezoneList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    },
+    {
+      "name": "mailerlite_capability_status",
+      "description": "Show this MailerLite account's REAL plan (name, price, subscriber tier, smart-sending flag — read directly from MailerLite's own account endpoint) plus any capability restrictions actually observed from live API responses, and MailerLite's own documented plan gates for things the account endpoint doesn't itself describe (e.g. whether HTML campaign content is unlocked at this tier). Use for: какой у меня план MailerLite, what MailerLite features am I limited to, plan limits, сколько стоит мой план mailerlite.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "CapabilityHint": {
+            "properties": {
+              "capability_key": {
+                "default": "",
+                "title": "Capability Key",
+                "type": "string"
+              },
+              "note": {
+                "default": "",
+                "title": "Note",
+                "type": "string"
+              },
+              "confirmed_restricted": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Confirmed Restricted"
+              }
+            },
+            "title": "CapabilityHint",
+            "type": "object"
+          },
+          "PlanInfo": {
+            "description": "The account's REAL plan, read directly from GET /account — confirmed\nlive to return real plan data (200 OK) even though it isn't in the\ndocumented endpoint list at developers.mailerlite.com. This is ground\ntruth when the call succeeds; GATED_HINTS/cached verdicts remain the\nfallback for sub-capabilities /account doesn't itself describe (e.g.\nwhether HTML content submission is unlocked at this exact tier).",
+            "properties": {
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "interval": {
+                "default": "",
+                "title": "Interval",
+                "type": "string"
+              },
+              "amount": {
+                "default": 0.0,
+                "title": "Amount",
+                "type": "number"
+              },
+              "min_subscribers": {
+                "default": 0,
+                "title": "Min Subscribers",
+                "type": "integer"
+              },
+              "max_subscribers": {
+                "default": 0,
+                "title": "Max Subscribers",
+                "type": "integer"
+              },
+              "smart_sending_enabled": {
+                "default": false,
+                "title": "Smart Sending Enabled",
+                "type": "boolean"
+              },
+              "paid_features": {
+                "default": false,
+                "title": "Paid Features",
+                "type": "boolean"
+              }
+            },
+            "title": "PlanInfo",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "account_label": {
+            "default": "",
+            "title": "Account Label",
+            "type": "string"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PlanInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "plan_lookup_failed": {
+            "default": false,
+            "title": "Plan Lookup Failed",
+            "type": "boolean"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/$defs/CapabilityHint"
+            },
+            "title": "Hints",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "CapabilityStatus",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "mailerlite"
+    }
+  ],
+  "signals": [],
+  "schedules": [],
+  "required_scopes": [],
+  "icon_size_bytes": 614,
+  "lifecycle": {
+    "health_check": {
+      "interval_sec": 60
+    }
+  },
+  "panels": [
+    {
+      "panel_id": "mailerlite_sidebar",
+      "slot": "left",
+      "title": "MailerLite",
+      "tree": {},
+      "icon": "Mail",
+      "refresh": "on_event:mailerlite.account.connected,mailerlite.account.switched,mailerlite.account.disconnected",
+      "center_overlay": false,
+      "default_width": 260
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+[project]
+name = "mailerlite-connector"
+version = "0.1.0"
+description = "MailerLite Connector — subscribers, groups, segments, campaigns, automations, forms, fields, and webhooks via the user's own MailerLite API key"
+requires-python = ">=3.11"
+dependencies = ["imperal-sdk>=5.0.1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[tool.setuptools]
+py-modules = [
+    "main", "app", "accounts", "ml_api", "capability", "params", "response_models",
+    "handlers_accounts", "handlers_subscribers", "handlers_groups_segments",
+    "handlers_campaigns", "handlers_automations", "handlers_forms_fields",
+    "handlers_webhooks_reference", "handlers_capability",
+    "skeleton", "panels",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

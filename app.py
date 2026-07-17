@@ -41,7 +41,7 @@ BATCH_MAX_REQUESTS = 50
 ext = Extension(
     "mailerlite-connector",
     version="0.1.0",
-    display_name="MailerLite",
+    display_name="MailerLite Connector",
     description=(
         "MailerLite email marketing — manage subscribers, groups, segments, "
         "campaigns, automations, forms, custom fields, and webhooks. Connect "
@@ -75,13 +75,6 @@ chat = ChatExtension(
         "автоматизации, формы, вебхуки mailerlite."
     ),
 )
-
-
-@ext.health_check
-async def health(ctx) -> dict:
-    """Report whether the user has at least one MailerLite account connected."""
-    from accounts import mailerlite_ready
-    return {"status": "ok", "version": ext.version, "mailerlite_connected": await mailerlite_ready(ctx)}
 
 
 @ext.health_check

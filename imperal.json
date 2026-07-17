@@ -3833,7 +3833,7 @@
   "signals": [],
   "schedules": [],
   "required_scopes": [],
-  "icon_size_bytes": 614,
+  "icon_size_bytes": 2102,
   "lifecycle": {
     "health_check": {
       "interval_sec": 60

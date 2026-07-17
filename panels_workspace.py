@@ -45,6 +45,16 @@ def _campaign_row(row: dict) -> dict:
     }
 
 
+def _retry_button() -> ui.UINode:
+    """Always-present recovery action — without this, an error mid-load left
+    the user with zero clickable path back (the actual bug behind \"back to
+    overview\"/\"open dashboard\" doing nothing for one particular connected
+    account: its campaigns call failed and the error screen had no button
+    at all, not even a broken one)."""
+    return ui.Button(label="↻ Retry", variant="outline", size="sm",
+                      on_click=ui.Call("__panel__mailerlite_workspace"))
+
+
 async def _overview(ctx, key: str) -> ui.UINode:
     try:
         data = await ml_get(ctx, key, "campaigns", {
@@ -52,7 +62,18 @@ async def _overview(ctx, key: str) -> ui.UINode:
             "filter[status]": "sent",
         })
     except MailerLiteError as e:
-        return ui.Alert(message=f"Couldn't reach MailerLite: {e.message}", type="error")
+        return ui.Stack(children=[
+            ui.Alert(message=f"Couldn't reach MailerLite: {e.message}", type="error"),
+            _retry_button(),
+        ])
+    except Exception as e:
+        # A non-MailerLiteError (network hiccup, unexpected response shape)
+        # must still leave the user a way out — never a dead-end blank/error
+        # screen with no clickable path back.
+        return ui.Stack(children=[
+            ui.Alert(message=f"Unexpected error loading campaigns: {e}", type="error"),
+            _retry_button(),
+        ])
 
     rows = data.get("data") or []
     if not rows:
@@ -112,10 +133,20 @@ async def _overview(ctx, key: str) -> ui.UINode:
 
 
 async def _detail(ctx, key: str, campaign_id: str) -> ui.UINode:
+    back_btn = ui.Button(label="← Back to overview", variant="ghost", size="sm",
+                          on_click=ui.Call("__panel__mailerlite_workspace"))
     try:
         data = await ml_get(ctx, key, f"campaigns/{campaign_id}")
     except MailerLiteError as e:
-        return ui.Alert(message=f"Couldn't load that campaign: {e.message}", type="error")
+        return ui.Stack(children=[
+            back_btn,
+            ui.Alert(message=f"Couldn't load that campaign: {e.message}", type="error"),
+        ])
+    except Exception as e:
+        return ui.Stack(children=[
+            back_btn,
+            ui.Alert(message=f"Unexpected error loading that campaign: {e}", type="error"),
+        ])
 
     row = data.get("data") or {}
     email0 = (row.get("emails") or [{}])[0] if row.get("emails") else {}
@@ -128,9 +159,6 @@ async def _detail(ctx, key: str, campaign_id: str) -> ui.UINode:
         {"stage": "Opened", "count": stats.get("opens_count", 0) or 0},
         {"stage": "Clicked", "count": stats.get("clicks_count", 0) or 0},
     ]
-
-    back_btn = ui.Button(label="← Back to overview", variant="ghost", size="sm",
-                          on_click=ui.Call("__panel__mailerlite_workspace"))
 
     return ui.Stack(children=[
         back_btn,
@@ -162,11 +190,22 @@ async def _detail(ctx, key: str, campaign_id: str) -> ui.UINode:
 
 @ext.panel("mailerlite_workspace", slot="center", title="MailerLite", icon="Mail")
 async def workspace_panel(ctx, campaign_id: str = ""):
-    if not await mailerlite_ready(ctx):
-        return ui.Empty(message="Connect your MailerLite account first — paste your API key in the left panel.")
+    try:
+        if not await mailerlite_ready(ctx):
+            return ui.Empty(message="Connect your MailerLite account first — paste your API key in the left panel.")
 
-    active = await _active_account(ctx)
-    key = (active or {}).get("api_key", "")
-    if campaign_id:
-        return await _detail(ctx, key, campaign_id)
-    return await _overview(ctx, key)
+        active = await _active_account(ctx)
+        key = (active or {}).get("api_key", "")
+        if campaign_id:
+            return await _detail(ctx, key, campaign_id)
+        return await _overview(ctx, key)
+    except Exception as e:
+        # Last-resort safety net: whatever went wrong, the user must always
+        # get a working button back to the overview — this is the actual
+        # root cause of "back to overview"/"open dashboard" doing nothing
+        # for one particular account: an unhandled exception here meant the
+        # panel rendered NOTHING, so there was no button to click at all.
+        return ui.Stack(children=[
+            ui.Alert(message=f"Something went wrong loading the MailerLite dashboard: {e}", type="error"),
+            _retry_button(),
+        ])

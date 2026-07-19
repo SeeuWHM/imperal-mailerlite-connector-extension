@@ -40,7 +40,7 @@ BATCH_MAX_REQUESTS = 50
 
 ext = Extension(
     "mailerlite-connector",
-    version="0.1.0",
+    version="0.2.0",
     display_name="MailerLite Connector",
     description=(
         "MailerLite email marketing — manage subscribers, groups, segments, "

@@ -18,9 +18,11 @@ from imperal_sdk import ui
 
 from app import ext
 from accounts import _active_account, mailerlite_ready
+from cache_models import CampaignsPayload, campaigns_cache_key
 from ml_api import ml_get, MailerLiteError, validate_campaigns_limit
 
 _OVERVIEW_LIMIT = 10
+_WORKSPACE_CACHE_TTL = 180  # overview list / single-campaign detail
 
 
 def _rate_str(stats: dict, key: str) -> str:
@@ -45,6 +47,13 @@ def _campaign_row(row: dict) -> dict:
     }
 
 
+async def _fetch_campaigns(ctx, api_key: str, endpoint: str, params: dict | None = None) -> CampaignsPayload:
+    """Raw fetcher passed to ctx.cache.get_or_fetch() — one MailerLite call
+    (list or single-detail), wrapped in the shared CampaignsPayload envelope."""
+    data = await ml_get(ctx, api_key, endpoint, params)
+    return CampaignsPayload(data=data)
+
+
 def _retry_button() -> ui.UINode:
     """Always-present recovery action — without this, an error mid-load left
     the user with zero clickable path back (the actual bug behind \"back to
@@ -64,10 +73,15 @@ def _retry_button() -> ui.UINode:
 
 async def _overview(ctx, key: str) -> ui.UINode:
     try:
-        data = await ml_get(ctx, key, "campaigns", {
-            "limit": validate_campaigns_limit(_OVERVIEW_LIMIT),
-            "filter[status]": "sent",
-        })
+        payload = await ctx.cache.get_or_fetch(
+            campaigns_cache_key("workspace_overview", key), CampaignsPayload,
+            lambda: _fetch_campaigns(ctx, key, "campaigns", {
+                "limit": validate_campaigns_limit(_OVERVIEW_LIMIT),
+                "filter[status]": "sent",
+            }),
+            ttl_seconds=_WORKSPACE_CACHE_TTL,
+        )
+        data = payload.data
     except MailerLiteError as e:
         return ui.Stack(children=[
             ui.Alert(message=f"Couldn't reach MailerLite: {e.message}", type="error"),
@@ -146,7 +160,12 @@ async def _detail(ctx, key: str, campaign_id: str) -> ui.UINode:
     back_btn = ui.Button(label="← Back to overview", variant="ghost", size="sm",
                           on_click=ui.Call("__panel__mailerlite_workspace", campaign_id=""))
     try:
-        data = await ml_get(ctx, key, f"campaigns/{campaign_id}")
+        payload = await ctx.cache.get_or_fetch(
+            campaigns_cache_key("workspace_detail", key, campaign_id), CampaignsPayload,
+            lambda: _fetch_campaigns(ctx, key, f"campaigns/{campaign_id}"),
+            ttl_seconds=_WORKSPACE_CACHE_TTL,
+        )
+        data = payload.data
     except MailerLiteError as e:
         return ui.Stack(children=[
             back_btn,

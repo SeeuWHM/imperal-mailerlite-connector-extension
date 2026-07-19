@@ -14,11 +14,12 @@ from imperal_sdk import ui
 
 from app import ext
 from accounts import _active_account, _all_accounts, mailerlite_ready
-from cache_models import SidebarStats
+from cache_models import CampaignsPayload, SidebarStats, campaigns_cache_key
 from ml_api import ml_get, MailerLiteError, validate_campaigns_limit
 
 _SIDEBAR_CAMPAIGNS_LIMIT = 8
-_STATS_TTL_SECONDS = 300  # 5 min — quick stats don't need to be live-fresh
+_STATS_TTL_SECONDS = 300     # 5 min — quick stats don't need to be live-fresh
+_CAMPAIGNS_TTL_SECONDS = 180  # recent-campaigns list — same reasoning as stats
 
 
 def _stats_cache_key(label: str) -> str:
@@ -28,6 +29,17 @@ def _stats_cache_key(label: str) -> str:
     import hashlib
     digest = hashlib.sha256(label.encode("utf-8")).hexdigest()[:24]
     return f"mailerlite-stats-{digest}"
+
+
+async def _fetch_campaigns_payload(ctx, api_key: str, endpoint: str = "campaigns",
+                                    params: dict | None = None) -> CampaignsPayload:
+    """Raw fetcher passed to ctx.cache.get_or_fetch() — one MailerLite
+    `campaigns` (list or single-detail) call, wrapped so the panel-facing
+    call sites (sidebar's recent list, workspace's overview list and
+    single-campaign detail) don't each have to hand-roll the
+    CampaignsPayload envelope."""
+    data = await ml_get(ctx, api_key, endpoint, params=params)
+    return CampaignsPayload(data=data)
 
 
 async def _fetch_sidebar_stats(ctx, active_key: str, active_label: str) -> SidebarStats:
@@ -149,11 +161,15 @@ async def sidebar_panel(ctx, show_add: bool = False):
         last_campaign_opens = stats.last_campaign_opens
         last_campaign_clicks = stats.last_campaign_clicks
 
-        campaigns = await ml_get(ctx, active_key, "campaigns", params={
-            "limit": validate_campaigns_limit(_SIDEBAR_CAMPAIGNS_LIMIT),
-            "filter[status]": "sent",
-        })
-        camp_rows = campaigns.get("data") or []
+        campaigns = await ctx.cache.get_or_fetch(
+            campaigns_cache_key("sidebar_recent", active_key), CampaignsPayload,
+            lambda: _fetch_campaigns_payload(ctx, active_key, params={
+                "limit": validate_campaigns_limit(_SIDEBAR_CAMPAIGNS_LIMIT),
+                "filter[status]": "sent",
+            }),
+            ttl_seconds=_CAMPAIGNS_TTL_SECONDS,
+        )
+        camp_rows = campaigns.data.get("data") or []
         if camp_rows:
             campaigns_section = [
                 ui.Divider(),

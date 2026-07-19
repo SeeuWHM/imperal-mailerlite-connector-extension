@@ -2,7 +2,7 @@
   "manifest_schema_version": 3,
   "sdk_version": "5.9.12",
   "app_id": "mailerlite-connector",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "MailerLite Connector",
   "description": "MailerLite email marketing — manage subscribers, groups, segments, campaigns, automations, forms, custom fields, and webhooks. Connect your own MailerLite API key to read and manage your own account's data here. Some features are plan-gated by MailerLite itself (e.g. resend/multivariate campaigns, advanced automation triggers) — this extension detects and reports that honestly rather than guessing.",
   "icon": "icon.svg",

@@ -43,3 +43,30 @@ class SidebarStats(BaseModel):
 
 
 ext.cache_model("mailerlite_sidebar_stats")(SidebarStats)
+
+
+class CampaignsPayload(BaseModel):
+    """Generic cache envelope for a raw MailerLite `campaigns` list/detail
+    JSON response (sidebar's \"Recent campaigns\", workspace's overview list,
+    and workspace's single-campaign detail) — these three call sites used to
+    hit ml_get() live on every single panel render, on top of the sidebar's
+    already-cached quick-stats. MailerLite campaign stats only change when a
+    campaign is actually sent/opened/clicked, not second-to-second, so a
+    short TTL window (see panels.py/panels_workspace.py's *_CACHE_TTL
+    constants) costs no real freshness.
+    """
+    data: dict = Field(default_factory=dict)
+    fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+ext.cache_model("mailerlite_campaigns_payload")(CampaignsPayload)
+
+
+def campaigns_cache_key(scope: str, account_key: str, extra: str = "") -> str:
+    """ctx.cache keys are capped at 128 chars and restricted to
+    [A-Za-z0-9_\\-:] (I-CACHE-KEY-SAFETY) — the API key is a live credential
+    and extra params (campaign_id, limit) are free-ish text, so hash the
+    whole thing rather than embed anything raw."""
+    import hashlib
+    digest = hashlib.sha256(f"{scope}:{account_key}:{extra}".encode("utf-8")).hexdigest()[:32]
+    return f"mailerlite-camp-{digest}"
